@@ -7,7 +7,8 @@ from .Embed import Embed
 from .Attachment import Attachment
 from typing import Union
 from ..utils.Request import Request
-from ..errors.ChannelErrors import SendMessageToChannelFailed
+from ..errors.ChannelErrors import *
+from ..errors.MessageErrors import *
 from .Reaction import Reaction
 from .MessageActivity import MessageActivity
 from .Application import Application
@@ -87,3 +88,23 @@ class Message:
             return Message(result, self.__token)
         else:
             raise SendMessageToChannelFailed(result)
+
+    async def edit(self, options: dict = {}):
+        """Edit your message."""
+
+        atom, result = await Request().send_async_request(f"/channels/{self.channel_id}/messages/{self.id}", "PATCH", self.__token, options)
+
+        if atom == 0:
+            return Message(result, self.__token)
+        else:
+            raise EditMessageFailed(result)
+
+    async def delete(self):
+        """Delete the message."""
+
+        atom, result = await Request().send_async_request(f"/channels/{self.channel_id}/messages/{self.id}", "DELETE", self.__token)
+
+        if atom == 0:
+            return self
+        else:
+            raise DeleteMessageFailed(result)

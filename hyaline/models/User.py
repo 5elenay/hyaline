@@ -11,4 +11,7 @@ class User:
         self.avatar: Union[str, None] = json['avatar']
         self.discriminator: str = json['discriminator']
 
+        self.tag: str = f"{self.username}#{self.discriminator}"
+        self.mention: str = f"<@{self.id}>"
+
         self.public_flags: int = json['public_flags']

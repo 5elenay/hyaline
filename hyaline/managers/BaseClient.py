@@ -35,8 +35,9 @@ class Session:
         self.token = options['TOKEN']
         self.intents = options['INTENTS']
         self.ws = "wss://gateway.discord.gg/?v=9&encoding=json"
+
         self.events = []
-        self.ping: timedelta = None
+        self.__will_loaded_events = []
 
     def event(self, event_name: str, fn: Callable) -> True:
         """Create new event."""
@@ -44,7 +45,7 @@ class Session:
         raise_error(event_name, "Event Name", str)
         raise_error(fn, "Function", type(lambda: True))
 
-        self.events.append({
+        self.__will_loaded_events.append({
             "EVENT": event_name,
             "FUNCTION": fn
         })
@@ -65,6 +66,27 @@ class Session:
             else:
                 self.client = ClientUser(result, self.token)
 
+                # Load Cache System
+                self.events.extend([
+                    {
+                        "EVENT": "MESSAGE_CREATE",
+                        "FUNCTION": self.client.add_message_cache
+                    },
+                    {
+                        "EVENT": "MESSAGE_DELETE",
+                        "FUNCTION": self.client.remove_message_cache
+                    },
+                    {
+                        "EVENT": "MESSAGE_UPDATE",
+                        "FUNCTION": self.client.update_message_cache
+                    },
+                    {
+                        "EVENT": "MESSAGE_DELETE_BULK",
+                        "FUNCTION": self.client.bulk_delete_message_cache
+                    },
+                    *self.__will_loaded_events
+                ])
+
                 # Websocket Connection:
                 async with wconnect(self.ws) as websocket:
                     while True:
@@ -78,16 +100,15 @@ class Session:
                         try:
                             if websocket_result['t'] in (
                                     k['EVENT'] for k in self.events):
-                                if websocket_result['t'] == "MESSAGE_CREATE":
+                                if websocket_result['t'] in ("MESSAGE_CREATE", "MESSAGE_UPDATE", ):
                                     await asyncio.gather(*(
                                         k['FUNCTION'](Message(websocket_result['d'], self.token)) for k in self.events if k['EVENT'] == websocket_result['t']
                                     ))
-                                """
                                 else:
                                     await asyncio.gather(*(
-                                        k['FUNCTION'](websocket_result) for k in self.events if k['EVENT'] == websocket_result['t']
+                                        k['FUNCTION'](websocket_result['d']) for k in self.events if k['EVENT'] == websocket_result['t']
                                     ))
-                                """
+
                         except Exception as error:
                             error = getattr(error, 'original', error)
                             print('Exception Found, Ignored:', file=sys.stderr)

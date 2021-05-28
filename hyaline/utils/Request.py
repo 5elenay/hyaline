@@ -22,9 +22,13 @@ class Request(object):
                     json_data = await response.json()
                 except client_exceptions.ContentTypeError:
                     body_text = await response.text()
-                    return (1, body_text)
 
-                if response.status != 200:
+                    if str(response.status).startswith("2"):
+                        return (0, "")
+                    else:
+                        return (1, body_text)
+
+                if not str(response.status).startswith("2"):
                     result = (
                         1,
                         f"Error ({response.status}): {json_data['message']}\nRetry After? {json_data['retry_after'] if 'retry_after' in json_data else 'Not Found'}",
