@@ -1,10 +1,10 @@
-from datetime import timedelta
 from typing import Callable
 from ..models.ClientUser import ClientUser
 from ..errors.SessionErrors import TokenNotFoundError, InvalidTokenError, IntentNotFoundError
 from ..utils.Request import Request
 from ..utils.WrongType import raise_error
 from ..models.Message import Message
+from gc import collect as collect_garbage
 
 from websockets import connect as wconnect
 import json
@@ -70,19 +70,19 @@ class Session:
                 self.events.extend([
                     {
                         "EVENT": "MESSAGE_CREATE",
-                        "FUNCTION": self.client.add_message_cache
+                        "FUNCTION": self.client._add_message_cache
                     },
                     {
                         "EVENT": "MESSAGE_DELETE",
-                        "FUNCTION": self.client.remove_message_cache
+                        "FUNCTION": self.client._remove_message_cache
                     },
                     {
                         "EVENT": "MESSAGE_UPDATE",
-                        "FUNCTION": self.client.update_message_cache
+                        "FUNCTION": self.client._update_message_cache
                     },
                     {
                         "EVENT": "MESSAGE_DELETE_BULK",
-                        "FUNCTION": self.client.bulk_delete_message_cache
+                        "FUNCTION": self.client._bulk_delete_message_cache
                     },
                     *self.__will_loaded_events
                 ])
@@ -90,6 +90,7 @@ class Session:
                 # Websocket Connection:
                 async with wconnect(self.ws) as websocket:
                     while True:
+                        collect_garbage()
                         websocket_result = json.loads(await websocket.recv())
                         print(
                             json.dumps(
@@ -98,16 +99,36 @@ class Session:
                             end="\n\n")
 
                         try:
+                            # Async Event Run Function
+                            async def _run_async_event(class_optional: Callable = None, token: str = None, events: tuple = ()):
+                                if class_optional is None:
+                                    if token is None:
+                                        await asyncio.gather(*(
+                                            k['FUNCTION'](websocket_result['d']) for k in self.events if k['EVENT'] in events
+                                        ))
+                                    else:
+                                        await asyncio.gather(*(
+                                            k['FUNCTION'](websocket_result['d'], token) for k in self.events if k['EVENT'] in events
+                                        ))
+                                else:
+                                    if token is None:
+                                        await asyncio.gather(*(
+                                            k['FUNCTION'](class_optional(websocket_result['d'])) for k in self.events if k['EVENT'] in events
+                                        ))
+                                    else:
+                                        await asyncio.gather(*(
+                                            k['FUNCTION'](class_optional(websocket_result['d'], token)) for k in self.events if k['EVENT'] in events
+                                        ))
+
                             if websocket_result['t'] in (
                                     k['EVENT'] for k in self.events):
-                                if websocket_result['t'] in ("MESSAGE_CREATE", "MESSAGE_UPDATE", ):
-                                    await asyncio.gather(*(
-                                        k['FUNCTION'](Message(websocket_result['d'], self.token)) for k in self.events if k['EVENT'] == websocket_result['t']
-                                    ))
+                                if websocket_result['t'] in (
+                                        "MESSAGE_CREATE", "MESSAGE_UPDATE", ):
+                                    loop.create_task(
+                                        _run_async_event(
+                                            Message, self.token, ("MESSAGE_CREATE", "MESSAGE_UPDATE", )))
                                 else:
-                                    await asyncio.gather(*(
-                                        k['FUNCTION'](websocket_result['d']) for k in self.events if k['EVENT'] == websocket_result['t']
-                                    ))
+                                    loop.create_task(_run_async_event())
 
                         except Exception as error:
                             error = getattr(error, 'original', error)

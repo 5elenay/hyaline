@@ -5,6 +5,7 @@ from .Channel import Channel
 from ..errors.ChannelErrors import GetChannelError
 from ..errors.MessageErrors import BulkDeleteMessageFailed
 from ..errors.ChannelErrors import FetchChannelHistoryFailed
+from ..utils.WrongType import raise_error
 
 
 @dataclass
@@ -29,17 +30,17 @@ class ClientUser:
         self.verified: bool = json['verified']
 
         self.channels: list = []
-        
+
         self.cache: dict = {
             "message": []
         }
 
-    async def add_message_cache(self, message):
+    async def _add_message_cache(self, message):
         """Add message to cache"""
 
         self.cache['message'].append(message)
 
-    async def remove_message_cache(self, packet):
+    async def _remove_message_cache(self, packet):
         """Remove deleted message from cache"""
 
         for index, cache in enumerate(self.cache['message']):
@@ -47,7 +48,7 @@ class ClientUser:
                 del self.cache['message'][index]
                 break
 
-    async def bulk_delete_message_cache(self, packet):
+    async def _bulk_delete_message_cache(self, packet):
         """Remove Bulk-deleted message from cache"""
 
         shift = 0
@@ -56,7 +57,7 @@ class ClientUser:
                 del self.cache['message'][index - shift]
                 shift += 1
 
-    async def update_message_cache(self, message):
+    async def _update_message_cache(self, message):
         """Update message from cache"""
 
         for index, cache in enumerate(self.cache['message']):
@@ -83,6 +84,8 @@ class ClientUser:
 
     async def bulk_delete(self, channel_id: str, limit: int = 10):
         """Bulk-delete channel messages with channel id."""
+        raise_error(channel_id, "id", str)
+        raise_error(limit, "limit", int)
 
         from .Message import Message
 
@@ -93,7 +96,8 @@ class ClientUser:
         atom, result = await Request().send_async_request(query_format, "GET", self.__token)
 
         if atom == 0:
-            filtered = [Message(i, self.__token).id for i in result][::-1][:limit]
+            filtered = [
+                Message(i, self.__token).id for i in result][::-1][:limit]
         else:
             raise FetchChannelHistoryFailed(result)
 

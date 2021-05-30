@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from datetime import datetime
+
 from dateutil.parser import parse
 from .Member import Member
 from .User import User
@@ -15,6 +16,9 @@ from .Application import Application
 from .MessageReference import MessageReference
 from .Sticker import Sticker
 from .Channel import Channel
+from ..utils.WrongType import raise_error
+from ..utils.Dict2Query import convert as d2q_converter
+from urllib.parse import quote
 
 
 @dataclass
@@ -75,7 +79,8 @@ class Message:
                                None] = json['components'] if 'components' in json else None
 
     async def reply(self, options: dict = {}):
-        """Reply to the message."""
+        """Reply to the message with API params."""
+        raise_error(options, "options", dict)
 
         atom, result = await Request().send_async_request(f"/channels/{self.channel_id}/messages", "POST", self.__token, {
             **options,
@@ -90,7 +95,8 @@ class Message:
             raise SendMessageToChannelFailed(result)
 
     async def edit(self, options: dict = {}):
-        """Edit your message."""
+        """Edit your message with API params."""
+        raise_error(options, "options", dict)
 
         atom, result = await Request().send_async_request(f"/channels/{self.channel_id}/messages/{self.id}", "PATCH", self.__token, options)
 
@@ -108,3 +114,54 @@ class Message:
             return self
         else:
             raise DeleteMessageFailed(result)
+
+    async def add_reaction(self, emoji: str):
+        """Add reaction to message."""
+        raise_error(emoji, "emoji", str)
+
+        atom, result = await Request().send_async_request(f"/channels/{self.channel_id}/messages/{self.id}/reactions/{quote(emoji)}/@me", "PUT", self.__token)
+
+        if atom == 0:
+            return self
+        else:
+            raise AddReactionToMessageFailed(result)
+
+    async def remove_reaction(self, emoji: str, user: str = None):
+        """Remove an user reaction from message."""
+        raise_error(emoji, "emoji", str)
+
+        if user is not None:
+            raise_error(user, "user", str)
+
+        atom, result = await Request().send_async_request(f"/channels/{self.channel_id}/messages/{self.id}/reactions/{quote(emoji)}/{'@me' if user is None else user}", "DELETE", self.__token)
+
+        if atom == 0:
+            return self
+        else:
+            raise RemoveReactionToMessageFailed(result)
+
+    async def fetch_reactions(self, emoji: str, options: dict = {"limit": 25}):
+        """Fetch message reactions with API params."""
+        raise_error(emoji, "emoji", str)
+        raise_error(options, "options", dict)
+
+        query_param = f"/channels/{self.channel_id}/messages/{self.id}/reactions/{emoji}{d2q_converter(options)}"
+
+        atom, result = await Request().send_async_request(query_param, "GET", self.__token)
+
+        if atom == 0:
+            return [User(i) for i in result]
+        else:
+            raise FetchReactionsFromMessageFailed(result)
+
+    async def remove_reactions(self, emoji: str = None):
+        """Fetch message reactions with API params."""
+        if emoji is not None:
+            raise_error(emoji, "emoji", str)
+
+        atom, result = await Request().send_async_request(f"/channels/{self.channel_id}/messages/{self.id}/reactions{'/' + quote(emoji) if emoji is not None else ''}", "DELETE", self.__token)
+
+        if atom == 0:
+            return True
+        else:
+            raise RemoveReactionsFromMessageFailed(result)

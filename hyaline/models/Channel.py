@@ -8,6 +8,8 @@ from .Overwrite import Overwrite
 from .User import User
 from .ThreadMetadata import ThreadMetadata
 from .ThreadMember import ThreadMember
+from ..utils.WrongType import raise_error
+from ..utils.Dict2Query import convert as d2q_converter
 
 
 @dataclass
@@ -62,6 +64,7 @@ class Channel:
 
     async def send(self, options: dict = {}):
         """Send message to the channel."""
+        raise_error(options, "options", dict)
 
         from .Message import Message
 
@@ -74,6 +77,7 @@ class Channel:
 
     async def edit(self, options: dict = {}):
         """Edit channel with API params."""
+        raise_error(options, "options", dict)
 
         atom, result = await Request().send_async_request(f"/channels/{self.id}", "PATCH", self.__token, options)
 
@@ -94,13 +98,11 @@ class Channel:
 
     async def fetch_history(self, options: dict = {}):
         """Fetch channel history with API params."""
+        raise_error(options, "options", dict)
 
         from .Message import Message
 
-        query_format = f"/channels/{self.id}/messages?{'&'.join(f'{i}={options.get(i)}' for i in options)}"
-        print(query_format)
-
-        atom, result = await Request().send_async_request(query_format, "GET", self.__token)
+        atom, result = await Request().send_async_request(f"/channels/{self.id}/messages{d2q_converter(options)}", "GET", self.__token)
 
         if atom == 0:
             return [Message(i, self.__token) for i in result]
@@ -109,6 +111,7 @@ class Channel:
 
     async def fetch_message(self, id: str):
         """Fetch channel message with id."""
+        raise_error(id, "id", str)
 
         from .Message import Message
 
