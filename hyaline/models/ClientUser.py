@@ -1,11 +1,11 @@
 from dataclasses import dataclass
 from typing import Union
 from ..utils.Request import Request
-from .Channel import Channel
-from ..errors.ChannelErrors import GetChannelError
-from ..errors.MessageErrors import BulkDeleteMessageFailed
-from ..errors.ChannelErrors import FetchChannelHistoryFailed
+from ..errors.ChannelErrors import *
+from ..errors.MessageErrors import *
+from ..errors.SessionErrors import *
 from ..utils.WrongType import raise_error
+from ..utils.Dict2Query import convert as d2q_converter
 
 
 @dataclass
@@ -65,9 +65,10 @@ class ClientUser:
                 self.cache['message'][index] = message
                 break
 
-    async def get_channel(self, id: str, fetch: bool = False) -> Channel:
+    async def get_channel(self, id: str, fetch: bool = False):
         """Get channel with id."""
 
+        from .Channel import Channel
         for channel in self.channels:
             if id == channel.id and not fetch:
                 return channel
@@ -107,3 +108,48 @@ class ClientUser:
             return filtered
         else:
             raise BulkDeleteMessageFailed(result)
+
+    async def say(self, channel_id: str, params: dict = {}):
+        """Send message to the channel."""
+        raise_error(channel_id, "channel_id", str)
+
+        if params is not None:
+            raise_error(params, "params", dict)
+
+        from .Message import Message
+
+        atom, result = await Request().send_async_request(f"/channels/{channel_id}/messages", "POST", self.__token, params)
+
+        if atom == 0:
+            return Message(result, self.__token)
+        else:
+            raise SendMessageToChannelFailed(result)
+
+    async def fetch_invite(self, code: str, options: dict = {}):
+        """Get invite informations with invite code (supports API params.)."""
+        raise_error(code, "code", str)
+
+        if options is not None:
+            raise_error(options, "options", dict)
+
+        from .Invite import Invite
+
+        atom, result = await Request().send_async_request(f"/invites/{code}{d2q_converter(options)}", "GET", self.__token)
+
+        if atom == 0:
+            return Invite(result, self.__token)
+        else:
+            raise FetchInviteFailedError(result)
+
+    async def remove_invite(self, code: str):
+        """Remove invite with invite code."""
+        raise_error(code, "code", str)
+
+        from .Invite import Invite
+
+        atom, result = await Request().send_async_request(f"/invites/{code}", "DELETE", self.__token)
+
+        if atom == 0:
+            return Invite(result, self.__token)
+        else:
+            raise RemoveInviteFailedError(result)

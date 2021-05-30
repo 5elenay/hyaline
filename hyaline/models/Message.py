@@ -1,21 +1,10 @@
 from dataclasses import dataclass
 from datetime import datetime
-
 from dateutil.parser import parse
-from .Member import Member
-from .User import User
-from .Embed import Embed
-from .Attachment import Attachment
 from typing import Union
 from ..utils.Request import Request
 from ..errors.ChannelErrors import *
 from ..errors.MessageErrors import *
-from .Reaction import Reaction
-from .MessageActivity import MessageActivity
-from .Application import Application
-from .MessageReference import MessageReference
-from .Sticker import Sticker
-from .Channel import Channel
 from ..utils.WrongType import raise_error
 from ..utils.Dict2Query import convert as d2q_converter
 from urllib.parse import quote
@@ -25,6 +14,17 @@ from urllib.parse import quote
 class Message:
     # Attrs
     def __init__(self, json, token) -> None:
+        from .Reaction import Reaction
+        from .MessageActivity import MessageActivity
+        from .Application import Application
+        from .MessageReference import MessageReference
+        from .Sticker import Sticker
+        from .Channel import Channel
+        from .Member import Member
+        from .User import User
+        from .Embed import Embed
+        from .Attachment import Attachment
+
         self.__token: str = token
 
         self.id: str = json['id']
@@ -142,6 +142,9 @@ class Message:
 
     async def fetch_reactions(self, emoji: str, options: dict = {"limit": 25}):
         """Fetch message reactions with API params."""
+
+        from .User import User
+
         raise_error(emoji, "emoji", str)
         raise_error(options, "options", dict)
 
@@ -165,3 +168,13 @@ class Message:
             return True
         else:
             raise RemoveReactionsFromMessageFailed(result)
+
+    async def crosspost(self):
+        """Cross post the message (https://discord.com/developers/docs/resources/channel#crosspost-message)"""
+
+        atom, result = await Request().send_async_request(f"/channels/{self.channel_id}/messages/{self.id}/crosspost", "POST", self.__token)
+
+        if atom == 0:
+            return Message(result)
+        else:
+            raise CrossPostMessageFailed(result)

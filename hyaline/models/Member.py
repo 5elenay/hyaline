@@ -2,13 +2,14 @@ from dataclasses import dataclass
 from datetime import datetime
 from dateutil.parser import parse
 from typing import Union
-from .User import User
 
 
 @dataclass
 class Member:
     # Attrs
     def __init__(self, json) -> None:
+        from .User import User
+
         self.user: Union[User, None] = User(
             json['user']) if 'user' in json else None
 

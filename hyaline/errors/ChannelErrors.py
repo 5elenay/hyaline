@@ -32,3 +32,15 @@ class FetchChannelMessageFailed(Exception):
     """Raises when fetching the channel message is failed."""
 
     pass
+
+
+class FetchChannelInvitesFailed(Exception):
+    """Raises when fetching the channel invites is failed."""
+
+    pass
+
+
+class CreateInviteFailed(Exception):
+    """Raises when creating new invite is failed."""
+
+    pass

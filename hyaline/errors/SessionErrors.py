@@ -14,3 +14,15 @@ class InvalidTokenError(Exception):
     """Raises when token is invalid in session object."""
 
     pass
+
+
+class FetchInviteFailedError(Exception):
+    """Raises when fetcing the invite is failed."""
+
+    pass
+
+
+class RemoveInviteFailedError(Exception):
+    """Raises when removing the invite is failed."""
+
+    pass

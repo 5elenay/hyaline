@@ -1,13 +1,14 @@
 from dataclasses import dataclass
 from typing import Union
-from .User import User
-from .Team import Team
 
 
 @dataclass
 class Application:
     # Attrs
     def __init__(self, json) -> None:
+        from .User import User
+        from .Team import Team
+
         self.id: str = json['id']
         self.name: str = json['name']
         self.icon: Union[str,

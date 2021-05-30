@@ -38,3 +38,9 @@ class RemoveReactionsFromMessageFailed(Exception):
     """Raises when removing reactions from message is failed."""
 
     pass
+
+
+class CrossPostMessageFailed(Exception):
+    """Raises when cross posting a message is failed."""
+
+    pass

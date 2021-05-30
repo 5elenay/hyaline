@@ -128,7 +128,8 @@ class Session:
                                         _run_async_event(
                                             Message, self.token, ("MESSAGE_CREATE", "MESSAGE_UPDATE", )))
                                 else:
-                                    loop.create_task(_run_async_event())
+                                    loop.create_task(_run_async_event(
+                                        events=(websocket_result['t'])))
 
                         except Exception as error:
                             error = getattr(error, 'original', error)

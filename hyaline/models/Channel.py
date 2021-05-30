@@ -4,10 +4,6 @@ from ..utils.Request import Request
 from ..errors.ChannelErrors import *
 from datetime import datetime
 from dateutil.parser import parse
-from .Overwrite import Overwrite
-from .User import User
-from .ThreadMetadata import ThreadMetadata
-from .ThreadMember import ThreadMember
 from ..utils.WrongType import raise_error
 from ..utils.Dict2Query import convert as d2q_converter
 
@@ -16,6 +12,11 @@ from ..utils.Dict2Query import convert as d2q_converter
 class Channel:
     # Attrs
     def __init__(self, json: dict, token: str) -> None:
+        from .Overwrite import Overwrite
+        from .User import User
+        from .ThreadMetadata import ThreadMetadata
+        from .ThreadMember import ThreadMember
+
         self.__token: str = token
 
         self.id: str = json['id']
@@ -121,3 +122,27 @@ class Channel:
             return Message(result, self.__token)
         else:
             raise FetchChannelMessageFailed(result)
+
+    async def fetch_invites(self):
+        """Fetch channel invites."""
+        from .Invite import Invite
+
+        atom, result = await Request().send_async_request(f"/channels/{self.id}/invites", "GET", self.__token)
+
+        if atom == 0:
+            return [Invite(i, self.__token) for i in result]
+        else:
+            raise FetchChannelInvitesFailed(result)
+
+    async def create_invite(self, params: dict = {}):
+        """Create new invite with API params."""
+        raise_error(params, "params", dict)
+
+        from .Invite import Invite
+
+        atom, result = await Request().send_async_request(f"/channels/{self.id}/invites", "POST", self.__token, params)
+
+        if atom == 0:
+            return Invite(result, self.__token)
+        else:
+            raise CreateInviteFailed(result)

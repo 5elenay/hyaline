@@ -1,12 +1,13 @@
 from dataclasses import dataclass
 from typing import Union
-from .User import User
 
 
 @dataclass
 class Emoji:
     # Attrs
     def __init__(self, json) -> None:
+        from .User import User
+
         self.id: Union[str, None] = json['id']
         self.name: Union[str, None] = json['name']
         self.roles: Union[list,
