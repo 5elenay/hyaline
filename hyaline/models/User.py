@@ -8,12 +8,13 @@ class User:
     def __init__(self, json, token) -> None:
         self.__token: str = token
 
-        self.id: str = json.get('id')
-        self.username: str = json.get('username')
-        self.avatar: Union[str, None] = json.get('avatar')
-        self.discriminator: str = json.get('discriminator')
+        for key in json:
+            setattr(self, key, json[key])
 
-        self.tag: str = f"{self.username}#{self.discriminator}"
-        self.mention: str = f"<@{self.id}>"
+    @property
+    def tag(self) -> str:
+        return f"{self.username}#{self.discriminator}"
 
-        self.public_flags: int = json.get('public_flags')
+    @property
+    def mention(self) -> str:
+        return f"<@{self.id}>"

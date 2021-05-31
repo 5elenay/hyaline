@@ -7,7 +7,8 @@ from dateutil.parser import parse
 class ThreadMember:
     # Attrs
     def __init__(self, json) -> None:
-        self.id: str = json['id']
-        self.user_id: str = json['user_id']
-        self.join_timestamp: datetime = parse(json['join_timestamp'])
-        self.flags: int = json['flags']
+        for key in json:
+            if key == "join_timestamp":
+                setattr(self, key, parse(json[key]) if json[key] else None)
+            else:
+                setattr(self, key, json[key])

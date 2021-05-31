@@ -138,11 +138,13 @@ class Session:
                                     k['EVENT'] for k in self.events]:
                                 # Message Events
                                 if websocket_result['t'] == "MESSAGE_CREATE":
-                                    asyncio.run_coroutine_threadsafe(_run_async_event(
-                                        Message, self.token, ("MESSAGE_CREATE", )), loop)
+                                    loop.create_task(
+                                        _run_async_event(
+                                            Message, self.token, ("MESSAGE_CREATE", )))
                                 elif websocket_result['t'] == "MESSAGE_UPDATE":
-                                    asyncio.run_coroutine_threadsafe(_run_async_event(
-                                        Message, self.token, ("MESSAGE_UPDATE", )), loop)
+                                    loop.create_task(
+                                        _run_async_event(
+                                            Message, self.token, ("MESSAGE_UPDATE", )))
                                 # Guild Events
                                 elif websocket_result['t'] == "GUILD_CREATE":
                                     await _run_async_event(

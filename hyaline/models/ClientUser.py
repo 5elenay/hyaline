@@ -14,20 +14,8 @@ class ClientUser:
     def __init__(self, json: dict, token: str) -> None:
         self.__token: str = token
 
-        self.id: str = json['id']
-
-        self.username: str = json['username']
-        self.avatar: Union[str, None] = json['avatar']
-        self.discriminator: str = json['discriminator']
-
-        self.public_flags: int = json['public_flags']
-        self.flags: int = json['flags']
-
-        self.bot: bool = json['bot']
-        self.locale: str = json['locale']
-        self.mfa_enabled: bool = json['mfa_enabled']
-        self.email: Union[str, None] = json['email']
-        self.verified: bool = json['verified']
+        for key in json:
+            setattr(self, key, json[key])
 
         self.channels: list = []
 

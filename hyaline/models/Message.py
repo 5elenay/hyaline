@@ -27,56 +27,49 @@ class Message:
 
         self.__token: str = token
 
-        self.id: str = json['id']
-        self.channel_id: str = json['channel_id']
-        self.guild_id: Union[str,
-                             None] = json['guild_id'] if 'guild_id' in json else None
-        self.author: Union[User, None] = User(
-            json['author'], self.__token) if 'author' in json else None
-        self.member: Union[Member, None] = Member(
-            json['member'], self.__token) if 'member' in json else None
-        self.content: str = json['content']
-        self.timestamp: datetime = parse(json['timestamp'])
-        self.edited_timestamp: Union[datetime, None] = parse(
-            json['edited_timestamp']) if 'edited_timestamp' in json and json['edited_timestamp'] else None
-        self.tts: bool = json['tts']
-
-        self.mention_everyone: bool = json['mention_everyone']
-        self.mentions: list = [User(i, self.__token) for i in json['mentions']]
-        self.mention_roles: bool = json['mention_everyone']
-        self.mention_channels: Union[list,
-                                     None] = json['mention_channels'] if 'mention_channels' in json else None
-        self.attachments: list = [Attachment(i) for i in json['attachments']]
-        self.embeds: list = [Embed(i) for i in json['embeds']]
-        self.reactions: Union[list, None] = [Reaction(
-            i, self.__token) for i in json['reactions']] if 'reactions' in json else None
-        self.nonce: Union[str, int,
-                          None] = json['nonce'] if 'nonce' in json else None
-        self.pinned: bool = json['pinned']
-        self.webhook_id: Union[str,
-                               None] = json['webhook_id'] if 'webhook_id' in json else None
-        self.type: int = json['type']
-
-        self.activity: Union[MessageActivity, None] = MessageActivity(
-            json['activity']) if 'activity' in json else None
-        self.application: Union[Application, None] = Application(
-            json['application'], self.__token) if 'application' in json else None
-        self.application_id: Union[str,
-                                   None] = json['application_id'] if 'application_id' in json else None
-
-        self.message_reference: Union[MessageReference, None] = MessageReference(
-            json['message_reference']) if 'message_reference' in json else None
-        self.flags: Union[int,
-                          None] = json['flags'] if 'flags' in json else None
-        self.stickers: Union[Sticker, None] = Sticker(
-            json['stickers']) if 'stickers' in json else None
-        self.referenced_message: Union[Message, None] = Message(
-            json['referenced_message'], self.__token) if 'referenced_message' in json and json['referenced_message'] else None
-        self.thread: Union[Channel, None] = Channel(
-            json['thread'], self.__token) if 'thread' in json else None
-
-        self.components: Union[dict,
-                               None] = json['components'] if 'components' in json else None
+        for key in json:
+            if key in ("mentions", "author"):
+                setattr(
+                    self,
+                    key,
+                    User(
+                        json[key],
+                        self.__token) if key == "author" else [
+                        User(
+                            i,
+                            self.__token) for i in json[key]])
+            elif key == "member":
+                setattr(self, key, Member(json[key], self.__token))
+            elif key in ("timestamp", "edited_timestamp"):
+                setattr(self, key, parse(json[key]) if json[key] else None)
+            elif key == "mentions":
+                setattr(self, key, [User(i, self.__token) for i in json[key]])
+            elif key == "attachments":
+                setattr(self, key, [Attachment(i) for i in json[key]])
+            elif key == "embeds":
+                setattr(self, key, [Embed(i) for i in json[key]])
+            elif key == "reactions":
+                setattr(self, key, [Reaction(i, self.__token)
+                        for i in json[key]])
+            elif key == "activity":
+                setattr(self, key, MessageActivity(json[key]))
+            elif key == "application":
+                setattr(self, key, Application(json[key], self.__token))
+            elif key == "message_reference":
+                setattr(self, key, MessageReference(json[key]))
+            elif key == "stickers":
+                setattr(self, key, [Sticker(i) for i in json[key]])
+            elif key == "referenced_message":
+                setattr(
+                    self,
+                    key,
+                    Message(
+                        json[key],
+                        self.__token) if json[key] else None)
+            elif key == "thread":
+                setattr(self, key, Channel(json[key], self.__token))
+            else:
+                setattr(self, key, json[key])
 
     async def reply(self, options: dict = {}):
         """Reply to the message with API params."""
