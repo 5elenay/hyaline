@@ -187,3 +187,25 @@ class ClientUser:
             return User(result, self.__token)
         else:
             raise FetchUserFailedError(result)
+
+    def get_guild(self, id: str):
+        """Get guild from cache."""
+        raise_error(id, "id", str)
+
+        for guild in self.cache["guild"]:
+            if guild.id == id:
+                return guild
+
+    async def fetch_guild(self, id: str, options: dict = {}):
+        """Fetch guild with API params."""
+        raise_error(id, "id", str)
+        raise_error(options, "options", dict)
+
+        from .Guild import Guild
+
+        atom, result = await Request().send_async_request(f"/guilds/{id}{d2q_converter(options)}", "GET", self.__token)
+
+        if atom == 0:
+            return Guild(result, self.__token)
+        else:
+            raise FetchGuildFailedError(result)

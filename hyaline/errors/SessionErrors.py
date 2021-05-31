@@ -32,3 +32,9 @@ class FetchUserFailedError(Exception):
     """Raises when fetching the user is failed."""
 
     pass
+
+
+class FetchGuildFailedError(Exception):
+    """Raises when fetching the guild is failed."""
+
+    pass

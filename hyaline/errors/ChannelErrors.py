@@ -44,3 +44,21 @@ class CreateInviteFailed(Exception):
     """Raises when creating new invite is failed."""
 
     pass
+
+
+class FetchPinnedMessagesFailed(Exception):
+    """Raises when fetching the pinned messages is failed."""
+
+    pass
+
+
+class PinMessageFailed(Exception):
+    """Raises when pinning a message is failed."""
+
+    pass
+
+
+class UnpinMessageFailed(Exception):
+    """Raises when unpinning a message is failed."""
+
+    pass

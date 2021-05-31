@@ -116,3 +116,36 @@ class Channel:
             return Invite(result, self.__token)
         else:
             raise CreateInviteFailed(result)
+
+    async def pinned_messages(self):
+        """Fetch pinned messages."""
+        from .Message import Message
+
+        atom, result = await Request().send_async_request(f"/channels/{self.id}/pins", "GET", self.__token)
+
+        if atom == 0:
+            return [Message(i, self.__token) for i in result]
+        else:
+            raise FetchPinnedMessagesFailed(result)
+
+    async def pin_message(self, message_id: str):
+        """Pin a message with id."""
+        raise_error(message_id, "message_id", str)
+
+        atom, result = await Request().send_async_request(f"/channels/{self.id}/pins/{message_id}", "PUT", self.__token)
+
+        if atom == 0:
+            return True
+        else:
+            raise PinMessageFailed(result)
+
+    async def unpin_message(self, message_id: str):
+        """Unpin a message with id."""
+        raise_error(message_id, "message_id", str)
+
+        atom, result = await Request().send_async_request(f"/channels/{self.id}/pins/{message_id}", "DELETE", self.__token)
+
+        if atom == 0:
+            return True
+        else:
+            raise PinMessageFailed(result)
