@@ -1,4 +1,3 @@
-from typing import Tuple
 from aiohttp import ClientSession, client_exceptions
 from dataclasses import dataclass
 
@@ -7,7 +6,7 @@ from dataclasses import dataclass
 class Request(object):
     api: str = "https://discord.com/api/v9"
 
-    async def send_async_request(self, endpoint: str, method: str, token: str, body: dict = None) -> Tuple:
+    async def send_async_request(self, endpoint: str, method: str, token: str, body: dict = None) -> tuple:
         """Send an async request to discord API."""
 
         result: tuple = ()

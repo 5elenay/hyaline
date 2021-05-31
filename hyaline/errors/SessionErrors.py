@@ -38,3 +38,15 @@ class FetchGuildFailedError(Exception):
     """Raises when fetching the guild is failed."""
 
     pass
+
+
+class EditClientUserFailed(Exception):
+    """Raises when editing the current user is failed."""
+
+    pass
+
+
+class LeaveGuildFailed(Exception):
+    """Raises when leaving the guild is failed."""
+
+    pass

@@ -209,3 +209,25 @@ class ClientUser:
             return Guild(result, self.__token)
         else:
             raise FetchGuildFailedError(result)
+
+    async def edit_user(self, params: dict = {}):
+        """Modify current user with API params."""
+
+        from .User import User
+
+        atom, result = await Request().send_async_request("/users/@me", "PATCH", self.__token, params)
+
+        if atom == 0:
+            return User(result, self.__token)
+        else:
+            raise EditClientUserFailed(result)
+
+    async def leave_guild(self, guild_id: str):
+        """Leave a guild with id."""
+
+        atom, result = await Request().send_async_request(f"/users/@me/guilds/{guild_id}", "DELETE", self.__token, {})
+
+        if atom == 0:
+            return True
+        else:
+            raise LeaveGuildFailed(result)
