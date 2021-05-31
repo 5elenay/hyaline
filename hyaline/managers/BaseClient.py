@@ -4,13 +4,14 @@ from ..errors.SessionErrors import TokenNotFoundError, InvalidTokenError, Intent
 from ..utils.Request import Request
 from ..utils.WrongType import raise_error
 from ..models.Message import Message
+from ..models.Guild import Guild
 from gc import collect as collect_garbage
 
-from websockets import connect as wconnect
 import json
 import asyncio
 import sys
 import traceback
+import aiohttp
 
 async_request = Request().send_async_request
 
@@ -84,14 +85,27 @@ class Session:
                         "EVENT": "MESSAGE_DELETE_BULK",
                         "FUNCTION": self.client._bulk_delete_message_cache
                     },
-                    *self.__will_loaded_events
+                    {
+                        "EVENT": "GUILD_CREATE",
+                        "FUNCTION": self.client._add_guild_cache
+                    },
+                    {
+                        "EVENT": "GUILD_UPDATE",
+                        "FUNCTION": self.client._update_guild_cache
+                    },
+                    {
+                        "EVENT": "GUILD_DELETE",
+                        "FUNCTION": self.client._remove_guild_cache
+                    },
+                    * self.__will_loaded_events
                 ])
 
                 # Websocket Connection:
-                async with wconnect(self.ws) as websocket:
-                    while True:
-                        collect_garbage()
-                        websocket_result = json.loads(await websocket.recv())
+                async with aiohttp.ClientSession().ws_connect(self.ws) as websocket:
+                    collect_garbage()
+
+                    async for msg in websocket:
+                        websocket_result = json.loads(msg.data)
                         print(
                             json.dumps(
                                 websocket_result,
@@ -120,16 +134,26 @@ class Session:
                                             k['FUNCTION'](class_optional(websocket_result['d'], token)) for k in self.events if k['EVENT'] in events
                                         ))
 
-                            if websocket_result['t'] in (
-                                    k['EVENT'] for k in self.events):
-                                if websocket_result['t'] in (
-                                        "MESSAGE_CREATE", "MESSAGE_UPDATE", ):
-                                    loop.create_task(
-                                        _run_async_event(
-                                            Message, self.token, ("MESSAGE_CREATE", "MESSAGE_UPDATE", )))
+                            if websocket_result['t'] in [
+                                    k['EVENT'] for k in self.events]:
+                                # Message Events
+                                if websocket_result['t'] == "MESSAGE_CREATE":
+                                    asyncio.run_coroutine_threadsafe(_run_async_event(
+                                        Message, self.token, ("MESSAGE_CREATE", )), loop)
+                                elif websocket_result['t'] == "MESSAGE_UPDATE":
+                                    asyncio.run_coroutine_threadsafe(_run_async_event(
+                                        Message, self.token, ("MESSAGE_UPDATE", )), loop)
+                                # Guild Events
+                                elif websocket_result['t'] == "GUILD_CREATE":
+                                    await _run_async_event(
+                                        Guild, self.token, ("GUILD_CREATE", ))
+                                elif websocket_result['t'] == "GUILD_UPDATE":
+                                    await _run_async_event(
+                                        Guild, self.token, ("GUILD_UPDATE", ))
+                                # Anything Else
                                 else:
-                                    loop.create_task(_run_async_event(
-                                        events=(websocket_result['t'])))
+                                    await _run_async_event(
+                                        events=(websocket_result['t']))
 
                         except Exception as error:
                             error = getattr(error, 'original', error)
@@ -139,7 +163,7 @@ class Session:
 
                         if websocket_result['op'] == 10:
                             heartbeat = websocket_result['d']['heartbeat_interval']
-                            await websocket.send(json.dumps({
+                            await websocket.send_str(json.dumps({
                                 "op": 2,
                                 "d": {
                                     "token": self.token,
@@ -155,13 +179,14 @@ class Session:
                             # Keep Connection Alive:
                             async def keep_alive():
                                 while True:
-                                    await websocket.send(json.dumps({
+                                    await websocket.send_str(json.dumps({
                                         "op": 1,
                                         "d": None
                                     }))
 
                                     await asyncio.sleep(heartbeat / 1000)
 
-                            loop.create_task(keep_alive())
+                            asyncio.run_coroutine_threadsafe(
+                                keep_alive(), loop)
 
         loop.run_until_complete(_connect())

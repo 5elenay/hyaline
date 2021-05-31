@@ -32,7 +32,8 @@ class ClientUser:
         self.channels: list = []
 
         self.cache: dict = {
-            "message": []
+            "message": [],
+            "guild": []
         }
 
     async def _add_message_cache(self, message):
@@ -63,6 +64,27 @@ class ClientUser:
         for index, cache in enumerate(self.cache['message']):
             if cache.id == message.id and cache.channel_id == message.channel_id:
                 self.cache['message'][index] = message
+                break
+
+    async def _add_guild_cache(self, guild):
+        """Add a guild to cache."""
+
+        self.cache["guild"].append(guild)
+
+    async def _update_guild_cache(self, guild):
+        """Update a guild from cache."""
+
+        for index, cache in enumerate(self.cache['guild']):
+            if cache.id == guild.id:
+                self.cache['guild'][index] = guild
+                break
+
+    async def _remove_guild_cache(self, packet):
+        """Remove a guild from cache."""
+
+        for index, cache in enumerate(self.cache['guild'][:]):
+            if cache.id == packet['id']:
+                del self.cache['guild'][index]
                 break
 
     async def get_channel(self, id: str, fetch: bool = False):
@@ -153,3 +175,27 @@ class ClientUser:
             return Invite(result, self.__token)
         else:
             raise RemoveInviteFailedError(result)
+
+    async def fetch_client_user(self):
+        """Fetch informations about client user."""
+        from .User import User
+
+        atom, result = await Request().send_async_request("/users/@me", "GET", self.__token)
+
+        if atom == 0:
+            return User(result, self.__token)
+        else:
+            raise FetchUserFailedError(result)
+
+    async def fetch_user(self, user_id: str):
+        """Fetch informations about an user."""
+        raise_error(user_id, "user_id", str)
+
+        from .User import User
+
+        atom, result = await Request().send_async_request(f"/users/{user_id}", "GET", self.__token)
+
+        if atom == 0:
+            return User(result, self.__token)
+        else:
+            raise FetchUserFailedError(result)

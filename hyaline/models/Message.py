@@ -32,9 +32,9 @@ class Message:
         self.guild_id: Union[str,
                              None] = json['guild_id'] if 'guild_id' in json else None
         self.author: Union[User, None] = User(
-            json['author']) if 'author' in json else None
+            json['author'], self.__token) if 'author' in json else None
         self.member: Union[Member, None] = Member(
-            json['member']) if 'member' in json else None
+            json['member'], self.__token) if 'member' in json else None
         self.content: str = json['content']
         self.timestamp: datetime = parse(json['timestamp'])
         self.edited_timestamp: Union[datetime, None] = parse(
@@ -42,14 +42,14 @@ class Message:
         self.tts: bool = json['tts']
 
         self.mention_everyone: bool = json['mention_everyone']
-        self.mentions: list = [User(i) for i in json['mentions']]
+        self.mentions: list = [User(i, self.__token) for i in json['mentions']]
         self.mention_roles: bool = json['mention_everyone']
         self.mention_channels: Union[list,
                                      None] = json['mention_channels'] if 'mention_channels' in json else None
         self.attachments: list = [Attachment(i) for i in json['attachments']]
         self.embeds: list = [Embed(i) for i in json['embeds']]
-        self.reactions: Union[list, None] = [
-            Reaction(i) for i in json['reactions']] if 'reactions' in json else None
+        self.reactions: Union[list, None] = [Reaction(
+            i, self.__token) for i in json['reactions']] if 'reactions' in json else None
         self.nonce: Union[str, int,
                           None] = json['nonce'] if 'nonce' in json else None
         self.pinned: bool = json['pinned']
@@ -60,7 +60,7 @@ class Message:
         self.activity: Union[MessageActivity, None] = MessageActivity(
             json['activity']) if 'activity' in json else None
         self.application: Union[Application, None] = Application(
-            json['application']) if 'application' in json else None
+            json['application'], self.__token) if 'application' in json else None
         self.application_id: Union[str,
                                    None] = json['application_id'] if 'application_id' in json else None
 
@@ -153,7 +153,7 @@ class Message:
         atom, result = await Request().send_async_request(query_param, "GET", self.__token)
 
         if atom == 0:
-            return [User(i) for i in result]
+            return [User(i, self.__token) for i in result]
         else:
             raise FetchReactionsFromMessageFailed(result)
 
@@ -175,6 +175,6 @@ class Message:
         atom, result = await Request().send_async_request(f"/channels/{self.channel_id}/messages/{self.id}/crosspost", "POST", self.__token)
 
         if atom == 0:
-            return Message(result)
+            return Message(result, self.__token)
         else:
             raise CrossPostMessageFailed(result)

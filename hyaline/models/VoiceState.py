@@ -7,7 +7,9 @@ from dateutil.parser import parse
 @dataclass
 class VoiceState:
     # Attrs
-    def __init__(self, json) -> None:
+    def __init__(self, json, token) -> None:
+        self.__token: str = token
+
         from .Member import Member
 
         self.guild_id: Union[str,
@@ -16,7 +18,7 @@ class VoiceState:
                                None] = json['channel_id'] if 'channel_id' in json else None
         self.user_id: str = json['user_id']
         self.member: Union[Member, None] = Member(
-            json['member']) if 'member' in json else None
+            json['member'], self.__token) if 'member' in json else None
         self.session_id: str = json['session_id']
         self.deaf: bool = json['deaf']
         self.mute: bool = json['mute']

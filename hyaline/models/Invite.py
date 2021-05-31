@@ -19,13 +19,13 @@ class Invite:
                           None] = json['guild'] if 'guild' in json else None
         self.channel: Channel = Channel(json['channel'], self.__token)
         self.inviter: Union[User, None] = User(
-            json['inviter']) if 'inviter' in json else None
+            json['inviter'], self.__token) if 'inviter' in json else None
         self.target_type: Union[int,
                                 None] = json['target_type'] if 'target_type' in json else None
         self.target_user: Union[User, None] = User(
-            json['target_user']) if 'target_user' in json else None
+            json['target_user'], self.__token) if 'target_user' in json else None
         self.target_application: Union[Application, None] = Application(
-            json['target_application']) if 'target_application' in json else None
+            json['target_application'], self.__token) if 'target_application' in json else None
         self.approximate_presence_count: Union[int,
                                                None] = json['approximate_presence_count'] if 'approximate_presence_count' in json else None
         self.approximate_member_count: Union[int,

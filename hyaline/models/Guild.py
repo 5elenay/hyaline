@@ -43,7 +43,7 @@ class Guild:
         self.default_message_notifications: int = json['default_message_notifications']
         self.explicit_content_filter: int = json['explicit_content_filter']
         self.roles: list = [Role(i) for i in json['roles']]
-        self.emojis: list = [Emoji(i) for i in json['emojis']]
+        self.emojis: list = [Emoji(i, self.__token) for i in json['emojis']]
         self.features: list = json['features']
         self.mfa_level: int = json['mfa_level']
         self.application_id: Union[str, None] = json['application_id']
@@ -59,9 +59,9 @@ class Guild:
         self.member_count: Union[int,
                                  None] = json['member_count'] if 'member_count' in json else None
         self.voice_states: Union[VoiceState, None] = [VoiceState(
-            i) for i in json['voice_states']] if 'voice_states' in json else None
+            i, self.__token) for i in json['voice_states']] if 'voice_states' in json else None
         self.members: Union[Member, None] = [
-            Member(i) for i in json['members']] if 'members' in json else None
+            Member(i, self.__token) for i in json['members']] if 'members' in json else None
         self.channels: Union[Channel, None] = [Channel(
             i, self.__token) for i in json['channels']] if 'channels' in json else None
         self.threads: Union[Channel, None] = [Channel(

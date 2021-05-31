@@ -7,11 +7,13 @@ from typing import Union
 @dataclass
 class Member:
     # Attrs
-    def __init__(self, json) -> None:
+    def __init__(self, json, token) -> None:
+        self.__token: str = token
+
         from .User import User
 
         self.user: Union[User, None] = User(
-            json['user']) if 'user' in json else None
+            json['user'], self.__token) if 'user' in json else None
 
         self.nick: Union[str, None] = json['nick'] if 'nick' in json else None
         self.roles: list = json['roles']

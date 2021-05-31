@@ -5,7 +5,9 @@ from typing import Union
 @dataclass
 class Application:
     # Attrs
-    def __init__(self, json) -> None:
+    def __init__(self, json, token) -> None:
+        self.__token: str = token
+
         from .User import User
         from .Team import Team
 
@@ -24,7 +26,7 @@ class Application:
                                          None] = json['terms_of_service_url'] if 'terms_of_service_url' in json else None
         self.privacy_policy_url: Union[str,
                                        None] = json['privacy_policy_url'] if 'privacy_policy_url' in json else None
-        self.owner: User = User(json['owner'])
+        self.owner: User = User(json['owner'], self.__token)
         self.summary: str = json['summary']
         self.verify_key: str = json['verify_key']
         self.team: Union[Team, None] = json['team']

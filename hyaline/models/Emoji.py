@@ -5,7 +5,9 @@ from typing import Union
 @dataclass
 class Emoji:
     # Attrs
-    def __init__(self, json) -> None:
+    def __init__(self, json, token) -> None:
+        self.__token: str = token
+
         from .User import User
 
         self.id: Union[str, None] = json['id']
@@ -13,7 +15,7 @@ class Emoji:
         self.roles: Union[list,
                           None] = json['roles'] if 'roles' in json else None
         self.user: Union[User, None] = User(
-            json['user']) if 'user' in json else None
+            json['user'], self.__token) if 'user' in json else None
 
         self.require_colons: Union[bool,
                                    None] = json['require_colons'] if 'require_colons' in json else None

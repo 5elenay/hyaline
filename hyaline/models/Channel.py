@@ -39,8 +39,8 @@ class Channel:
                                None] = json['user_limit'] if 'user_limit' in json else None
         self.rate_limit_per_user: Union[int,
                                         None] = json['rate_limit_per_user'] if 'rate_limit_per_user' in json else None
-        self.recipients: Union[User, None] = [
-            User(i) for i in json['recipients']] if 'recipients' in json else None
+        self.recipients: Union[User, None] = [User(
+            i, self.__token) for i in json['recipients']] if 'recipients' in json else None
         self.icon: Union[str, None] = json['icon'] if 'icon' in json else None
         self.owner_id: Union[str,
                              None] = json['owner_id'] if 'owner_id' in json else None

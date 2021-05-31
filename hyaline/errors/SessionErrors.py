@@ -26,3 +26,9 @@ class RemoveInviteFailedError(Exception):
     """Raises when removing the invite is failed."""
 
     pass
+
+
+class FetchUserFailedError(Exception):
+    """Raises when fetching the user is failed."""
+
+    pass
