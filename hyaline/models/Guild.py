@@ -3,9 +3,9 @@ from dataclasses import dataclass
 from dateutil.parser import parse
 
 from ..errors.GuildErrors import *
+from ..utils.Dict2Query import convert as d2q_converter
 from ..utils.Request import Request
 from ..utils.WrongType import raise_error
-from ..utils.Dict2Query import convert as d2q_converter
 
 
 @dataclass
@@ -110,7 +110,7 @@ class Guild:
             raise FetchGuildMemberFailed(result)
 
     async def fetch_member_list(self, options: dict = None):
-        """Fetch a member from guild with id."""
+        """Fetch member list with API params."""
         if options is None:
             options = {}
 
@@ -118,9 +118,45 @@ class Guild:
 
         from .Member import Member
 
-        atom, result = await Request().send_async_request(f"/guilds/{self.id}/members{d2q_converter(options)}", "GET", self.__token)
+        atom, result = await Request().send_async_request(f"/guilds/{self.id}/members{d2q_converter(options)}", "GET",
+                                                          self.__token)
 
         if atom == 0:
             return [Member(i, self.__token) for i in result]
         else:
             raise FetchGuildMembersFailed(result)
+
+    async def search_members(self, options: dict = None):
+        """Search members with API params (https://discord.com/developers/docs/resources/guild#search-guild-members-query-string-params)."""
+        if options is None:
+            options = {}
+
+        raise_error(options, "options", dict)
+
+        from .Member import Member
+
+        atom, result = await Request().send_async_request(f"/guilds/{self.id}/members/search{d2q_converter(options)}",
+                                                          "GET", self.__token)
+
+        if atom == 0:
+            return [Member(i, self.__token) for i in result]
+        else:
+            raise SearchGuildMemberFailed(result)
+
+    async def edit_member(self, member_id: str, options: dict = None):
+        """Edit guild member with API params."""
+        if options is None:
+            options = {}
+
+        raise_error(member_id, "member_id", str)
+        raise_error(options, "options", dict)
+
+        from .Member import Member
+
+        atom, result = await Request().send_async_request(f"/guilds/{self.id}/members/{member_id}", "PATCH",
+                                                          self.__token, options)
+
+        if atom == 0:
+            return Member(result, self.__token)
+        else:
+            raise EditGuildMemberFailed(result)

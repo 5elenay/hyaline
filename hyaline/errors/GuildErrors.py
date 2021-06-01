@@ -32,3 +32,15 @@ class FetchGuildMembersFailed(Exception):
     """Raises when fetching guild member list is failed."""
 
     pass
+
+
+class SearchGuildMemberFailed(Exception):
+    """Raises when searching the guild members is failed."""
+
+    pass
+
+
+class EditGuildMemberFailed(Exception):
+    """Raises when editing the guild member is failed."""
+
+    pass
