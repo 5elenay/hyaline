@@ -1,19 +1,21 @@
 from dataclasses import dataclass
-from datetime import datetime
+from urllib.parse import quote
+
 from dateutil.parser import parse
-from typing import Union
-from ..utils.Request import Request
+
 from ..errors.ChannelErrors import *
 from ..errors.MessageErrors import *
-from ..utils.WrongType import raise_error
 from ..utils.Dict2Query import convert as d2q_converter
-from urllib.parse import quote
+from ..utils.Request import Request
+from ..utils.WrongType import raise_error
 
 
 @dataclass
 class Message:
     # Attrs
     def __init__(self, json, token) -> None:
+        self.id = None
+        self.channel_id = None
         from .Reaction import Reaction
         from .MessageActivity import MessageActivity
         from .Application import Application
@@ -50,7 +52,7 @@ class Message:
                 setattr(self, key, [Embed(i) for i in json[key]])
             elif key == "reactions":
                 setattr(self, key, [Reaction(i, self.__token)
-                        for i in json[key]])
+                                    for i in json[key]])
             elif key == "activity":
                 setattr(self, key, MessageActivity(json[key]))
             elif key == "application":
@@ -71,27 +73,33 @@ class Message:
             else:
                 setattr(self, key, json[key])
 
-    async def reply(self, options: dict = {}):
+    async def reply(self, options=None):
         """Reply to the message with API params."""
+        if options is None:
+            options = {}
         raise_error(options, "options", dict)
 
-        atom, result = await Request().send_async_request(f"/channels/{self.channel_id}/messages", "POST", self.__token, {
-            **options,
-            "message_reference": {
-                "message_id": self.id
-            }
-        })
+        atom, result = await Request().send_async_request(f"/channels/{self.channel_id}/messages", "POST", self.__token,
+                                                          {
+                                                              **options,
+                                                              "message_reference": {
+                                                                  "message_id": self.id
+                                                              }
+                                                          })
 
         if atom == 0:
             return Message(result, self.__token)
         else:
             raise SendMessageToChannelFailed(result)
 
-    async def edit(self, options: dict = {}):
+    async def edit(self, options=None):
         """Edit your message with API params."""
+        if options is None:
+            options = {}
         raise_error(options, "options", dict)
 
-        atom, result = await Request().send_async_request(f"/channels/{self.channel_id}/messages/{self.id}", "PATCH", self.__token, options)
+        atom, result = await Request().send_async_request(f"/channels/{self.channel_id}/messages/{self.id}", "PATCH",
+                                                          self.__token, options)
 
         if atom == 0:
             return Message(result, self.__token)
@@ -101,7 +109,8 @@ class Message:
     async def delete(self):
         """Delete the message."""
 
-        atom, result = await Request().send_async_request(f"/channels/{self.channel_id}/messages/{self.id}", "DELETE", self.__token)
+        atom, result = await Request().send_async_request(f"/channels/{self.channel_id}/messages/{self.id}", "DELETE",
+                                                          self.__token)
 
         if atom == 0:
             return self
@@ -112,7 +121,8 @@ class Message:
         """Add reaction to message."""
         raise_error(emoji, "emoji", str)
 
-        atom, result = await Request().send_async_request(f"/channels/{self.channel_id}/messages/{self.id}/reactions/{quote(emoji)}/@me", "PUT", self.__token)
+        atom, result = await Request().send_async_request(
+            f"/channels/{self.channel_id}/messages/{self.id}/reactions/{quote(emoji)}/@me", "PUT", self.__token)
 
         if atom == 0:
             return self
@@ -126,16 +136,20 @@ class Message:
         if user is not None:
             raise_error(user, "user", str)
 
-        atom, result = await Request().send_async_request(f"/channels/{self.channel_id}/messages/{self.id}/reactions/{quote(emoji)}/{'@me' if user is None else user}", "DELETE", self.__token)
+        atom, result = await Request().send_async_request(
+            f"/channels/{self.channel_id}/messages/{self.id}/reactions/{quote(emoji)}/{'@me' if user is None else user}",
+            "DELETE", self.__token)
 
         if atom == 0:
             return self
         else:
             raise RemoveReactionToMessageFailed(result)
 
-    async def fetch_reactions(self, emoji: str, options: dict = {"limit": 25}):
+    async def fetch_reactions(self, emoji: str, options=None):
         """Fetch message reactions with API params."""
 
+        if options is None:
+            options = {"limit": 25}
         from .User import User
 
         raise_error(emoji, "emoji", str)
@@ -155,7 +169,9 @@ class Message:
         if emoji is not None:
             raise_error(emoji, "emoji", str)
 
-        atom, result = await Request().send_async_request(f"/channels/{self.channel_id}/messages/{self.id}/reactions{'/' + quote(emoji) if emoji is not None else ''}", "DELETE", self.__token)
+        atom, result = await Request().send_async_request(
+            f"/channels/{self.channel_id}/messages/{self.id}/reactions{'/' + quote(emoji) if emoji is not None else ''}",
+            "DELETE", self.__token)
 
         if atom == 0:
             return True
@@ -165,7 +181,8 @@ class Message:
     async def crosspost(self):
         """Cross post the message (https://discord.com/developers/docs/resources/channel#crosspost-message)"""
 
-        atom, result = await Request().send_async_request(f"/channels/{self.channel_id}/messages/{self.id}/crosspost", "POST", self.__token)
+        atom, result = await Request().send_async_request(f"/channels/{self.channel_id}/messages/{self.id}/crosspost",
+                                                          "POST", self.__token)
 
         if atom == 0:
             return Message(result, self.__token)

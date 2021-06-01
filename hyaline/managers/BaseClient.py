@@ -1,19 +1,23 @@
-from typing import Callable
-from ..models.ClientUser import ClientUser
-from ..errors.SessionErrors import TokenNotFoundError, InvalidTokenError, IntentNotFoundError
-from ..utils.Request import Request
-from ..utils.WrongType import raise_error
-from ..models.Message import Message
-from ..models.Guild import Guild
-from gc import collect as collect_garbage
-
-import json
 import asyncio
+import json
 import sys
 import traceback
+from gc import collect as collect_garbage
+from typing import Callable
+
 import aiohttp
 
+from ..errors.SessionErrors import TokenNotFoundError, InvalidTokenError, IntentNotFoundError
+from ..models.ClientUser import ClientUser
+from ..models.Guild import Guild
+from ..models.Member import Member
+from ..models.Message import Message
+from ..models.User import User
+from ..utils.Request import Request
+from ..utils.WrongType import raise_error
+
 async_request = Request().send_async_request
+
 
 # Session Class
 
@@ -36,6 +40,7 @@ class Session:
         self.token = options['TOKEN']
         self.intents = options['INTENTS']
         self.ws = "wss://gateway.discord.gg/?v=9&encoding=json"
+        self.client = None
 
         self.events = []
         self.__will_loaded_events = []
@@ -67,8 +72,7 @@ class Session:
             else:
                 self.client = ClientUser(result, self.token)
 
-                # Load Cache System
-                self.events.extend([
+                cache_events = [
                     {
                         "EVENT": "MESSAGE_CREATE",
                         "FUNCTION": self.client._add_message_cache
@@ -97,14 +101,31 @@ class Session:
                         "EVENT": "GUILD_DELETE",
                         "FUNCTION": self.client._remove_guild_cache
                     },
-                    * self.__will_loaded_events
+                    {
+                        "EVENT": "GUILD_MEMBER_ADD",
+                        "FUNCTION": self.client._add_guild_member
+                    },
+                    {
+                        "EVENT": "GUILD_MEMBER_REMOVE",
+                        "FUNCTION": self.client._remove_guild_member
+                    },
+                    {
+                        "EVENT": "GUILD_MEMBER_UPDATE",
+                        "FUNCTION": self.client._update_guild_member
+                    }
+                ]
+
+                # Load Cache System
+                self.events.extend([
+                    *cache_events,
+                    *self.__will_loaded_events
                 ])
 
                 # Websocket Connection:
                 async with aiohttp.ClientSession().ws_connect(self.ws) as websocket:
-                    collect_garbage()
-
                     async for msg in websocket:
+                        collect_garbage()
+
                         websocket_result = json.loads(msg.data)
                         print(
                             json.dumps(
@@ -114,24 +135,29 @@ class Session:
 
                         try:
                             # Async Event Run Function
-                            async def _run_async_event(class_optional: Callable = None, token: str = None, events: tuple = ()):
+                            async def _run_async_event(class_optional: Callable = None, token: str = None,
+                                                       events: tuple = ()):
                                 if class_optional is None:
                                     if token is None:
                                         await asyncio.gather(*(
-                                            k['FUNCTION'](websocket_result['d']) for k in self.events if k['EVENT'] in events
+                                            k['FUNCTION'](websocket_result['d']) for k in self.events if
+                                            k['EVENT'] in events
                                         ))
                                     else:
                                         await asyncio.gather(*(
-                                            k['FUNCTION'](websocket_result['d'], token) for k in self.events if k['EVENT'] in events
+                                            k['FUNCTION'](websocket_result['d'], token) for k in self.events if
+                                            k['EVENT'] in events
                                         ))
                                 else:
                                     if token is None:
                                         await asyncio.gather(*(
-                                            k['FUNCTION'](class_optional(websocket_result['d'])) for k in self.events if k['EVENT'] in events
+                                            k['FUNCTION'](class_optional(websocket_result['d'])) for k in self.events if
+                                            k['EVENT'] in events
                                         ))
                                     else:
                                         await asyncio.gather(*(
-                                            k['FUNCTION'](class_optional(websocket_result['d'], token)) for k in self.events if k['EVENT'] in events
+                                            k['FUNCTION'](class_optional(websocket_result['d'], token)) for k in
+                                            self.events if k['EVENT'] in events
                                         ))
 
                             if websocket_result['t'] in [
@@ -140,18 +166,41 @@ class Session:
                                 if websocket_result['t'] == "MESSAGE_CREATE":
                                     loop.create_task(
                                         _run_async_event(
-                                            Message, self.token, ("MESSAGE_CREATE", )))
+                                            Message, self.token, ("MESSAGE_CREATE",)))
                                 elif websocket_result['t'] == "MESSAGE_UPDATE":
                                     loop.create_task(
                                         _run_async_event(
-                                            Message, self.token, ("MESSAGE_UPDATE", )))
+                                            Message, self.token, ("MESSAGE_UPDATE",)))
                                 # Guild Events
                                 elif websocket_result['t'] == "GUILD_CREATE":
                                     await _run_async_event(
-                                        Guild, self.token, ("GUILD_CREATE", ))
+                                        Guild, self.token, ("GUILD_CREATE",))
                                 elif websocket_result['t'] == "GUILD_UPDATE":
                                     await _run_async_event(
-                                        Guild, self.token, ("GUILD_UPDATE", ))
+                                        Guild, self.token, ("GUILD_UPDATE",))
+                                # Member Cache
+                                elif websocket_result['t'] in ("GUILD_MEMBER_ADD", "GUILD_MEMBER_UPDATE"):
+                                    async def _run_event_in_executor(evnt):
+                                        await asyncio.gather(*(
+                                            k['FUNCTION'](websocket_result['d']['guild_id'],
+                                                          Member(websocket_result['d'], self.token)) for k
+                                            in
+                                            self.events if k['EVENT'] == evnt
+                                        ))
+
+                                    loop.create_task(
+                                        _run_event_in_executor(
+                                            websocket_result['t']))
+                                elif websocket_result['t'] == "GUILD_MEMBER_REMOVE":
+                                    async def _run_event_in_executor():
+                                        await asyncio.gather(*(
+                                            k['FUNCTION'](websocket_result['d']['guild_id'],
+                                                          User(websocket_result['d']['user'], self.token)) for k
+                                            in
+                                            self.events if k['EVENT'] == "GUILD_MEMBER_REMOVE"
+                                        ))
+
+                                    loop.create_task(_run_event_in_executor())
                                 # Anything Else
                                 else:
                                     await _run_async_event(

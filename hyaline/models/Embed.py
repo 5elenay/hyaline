@@ -5,7 +5,9 @@ from datetime import datetime
 @dataclass
 class Embed:
     # Attrs
-    def __init__(self, data: dict = {}) -> None:
+    def __init__(self, data=None) -> None:
+        if data is None:
+            data = {}
         self.color = None
         self.title = None
         self.description = None

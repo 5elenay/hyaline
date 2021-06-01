@@ -2,15 +2,15 @@ from dataclasses import dataclass
 
 
 @dataclass
-class Emoji:
+class GuildPreview:
     # Attrs
     def __init__(self, json, token) -> None:
-        self.__token: str = token
+        self.__token = token
 
-        from .User import User
+        from .Emoji import Emoji
 
         for key in json:
-            if key == "user":
-                setattr(self, key, User(json[key], self.__token))
+            if key == "emojis":
+                setattr(self, key, [Emoji(i, self.__token) for i in json[key]])
             else:
                 setattr(self, key, json[key])

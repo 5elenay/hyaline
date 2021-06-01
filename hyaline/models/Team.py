@@ -11,6 +11,7 @@ class Team:
 
         for key in json:
             if key == "members":
-                setattr(self, key, [TeamMember(i) for i in json[key]])
+                setattr(self, key, [TeamMember(i, self.__token)
+                        for i in json[key]])
             else:
                 setattr(self, key, json[key])

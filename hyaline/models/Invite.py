@@ -1,6 +1,5 @@
 from dataclasses import dataclass
-from typing import Union
-from datetime import datetime
+
 from dateutil.parser import parse
 
 
@@ -20,7 +19,7 @@ class Invite:
                 setattr(self, key, Guild(json[key], self.__token))
             elif key == "channel":
                 setattr(self, key, Channel(json[key], self.__token))
-            elif key in ("inviter", "target_user", ):
+            elif key in ("inviter", "target_user",):
                 setattr(self, key, User(json[key], self.__token))
             elif key == "target_application":
                 setattr(self, key, Application(json[key], self.__token))

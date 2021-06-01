@@ -50,3 +50,9 @@ class LeaveGuildFailed(Exception):
     """Raises when leaving the guild is failed."""
 
     pass
+
+
+class FetchGuildPreviewFailed(Exception):
+    """Raises when fetching the guild preview is failed."""
+
+    pass

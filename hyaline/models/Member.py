@@ -1,7 +1,6 @@
 from dataclasses import dataclass
-from datetime import datetime
+
 from dateutil.parser import parse
-from typing import Union
 
 
 @dataclass

@@ -1,17 +1,19 @@
 from dataclasses import dataclass
-from typing import Union
-from ..utils.Request import Request
-from ..errors.ChannelErrors import *
-from datetime import datetime
+
 from dateutil.parser import parse
-from ..utils.WrongType import raise_error
+
+from ..errors.ChannelErrors import *
 from ..utils.Dict2Query import convert as d2q_converter
+from ..utils.Request import Request
+from ..utils.WrongType import raise_error
 
 
 @dataclass
 class Channel:
     # Attrs
     def __init__(self, json: dict, token: str) -> None:
+        self.id = None
+
         from .Overwrite import Overwrite
         from .User import User
         from .ThreadMetadata import ThreadMetadata
@@ -33,21 +35,27 @@ class Channel:
             else:
                 setattr(self, key, json[key])
 
-    async def send(self, options: dict = {}):
+    async def send(self, options=None):
         """Send message to the channel."""
+        if options is None:
+            options = {}
+
         raise_error(options, "options", dict)
 
         from .Message import Message
 
-        atom, result = await Request().send_async_request(f"/channels/{self.id}/messages", "POST", self.__token, options)
+        atom, result = await Request().send_async_request(f"/channels/{self.id}/messages", "POST", self.__token,
+                                                          options)
 
         if atom == 0:
             return Message(result, self.__token)
         else:
             raise SendMessageToChannelFailed(result)
 
-    async def edit(self, options: dict = {}):
+    async def edit(self, options=None):
         """Edit channel with API params."""
+        if options is None:
+            options = {}
         raise_error(options, "options", dict)
 
         atom, result = await Request().send_async_request(f"/channels/{self.id}", "PATCH", self.__token, options)
@@ -58,7 +66,7 @@ class Channel:
             raise EditChannelFailed(result)
 
     async def delete(self):
-        """Delete channel with API params."""
+        """Delete current channel."""
 
         atom, result = await Request().send_async_request(f"/channels/{self.id}", "DELETE", self.__token)
 
@@ -67,26 +75,30 @@ class Channel:
         else:
             raise DeleteChannelFailed(result)
 
-    async def fetch_history(self, options: dict = {}):
+    async def fetch_history(self, options=None):
         """Fetch channel history with API params."""
+        if options is None:
+            options = {}
         raise_error(options, "options", dict)
 
         from .Message import Message
 
-        atom, result = await Request().send_async_request(f"/channels/{self.id}/messages{d2q_converter(options)}", "GET", self.__token)
+        atom, result = await Request().send_async_request(f"/channels/{self.id}/messages{d2q_converter(options)}",
+                                                          "GET", self.__token)
 
         if atom == 0:
             return [Message(i, self.__token) for i in result]
         else:
             raise FetchChannelHistoryFailed(result)
 
-    async def fetch_message(self, id: str):
+    async def fetch_message(self, message_id: str):
         """Fetch channel message with id."""
-        raise_error(id, "id", str)
+        raise_error(message_id, "id", str)
 
         from .Message import Message
 
-        atom, result = await Request().send_async_request(f"/channels/{self.id}/messages/{id}", "GET", self.__token)
+        atom, result = await Request().send_async_request(f"/channels/{self.id}/messages/{message_id}", "GET",
+                                                          self.__token)
 
         if atom == 0:
             return Message(result, self.__token)
@@ -104,8 +116,10 @@ class Channel:
         else:
             raise FetchChannelInvitesFailed(result)
 
-    async def create_invite(self, params: dict = {}):
+    async def create_invite(self, params=None):
         """Create new invite with API params."""
+        if params is None:
+            params = {}
         raise_error(params, "params", dict)
 
         from .Invite import Invite
@@ -143,7 +157,8 @@ class Channel:
         """Unpin a message with id."""
         raise_error(message_id, "message_id", str)
 
-        atom, result = await Request().send_async_request(f"/channels/{self.id}/pins/{message_id}", "DELETE", self.__token)
+        atom, result = await Request().send_async_request(f"/channels/{self.id}/pins/{message_id}", "DELETE",
+                                                          self.__token)
 
         if atom == 0:
             return True
