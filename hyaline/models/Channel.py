@@ -164,3 +164,28 @@ class Channel:
             return True
         else:
             raise PinMessageFailed(result)
+
+    async def edit_permissions(self, user_or_role_id: str, params: dict):
+        """Edit channel permission. (bitwise must be string.)"""
+        raise_error(user_or_role_id, "user_or_role_id", str)
+        raise_error(params, "params", dict)
+
+        atom, result = await Request().send_async_request(f"/channels/{self.id}/permissions/{user_or_role_id}", "PUT",
+                                                          self.__token, params)
+
+        if atom == 0:
+            return self
+        else:
+            raise EditChannelPermissionsFailed(result)
+
+    async def delete_permissions(self, user_or_role_id: str):
+        """Delete permissions from role/user"""
+        raise_error(user_or_role_id, "user_or_role_id", str)
+
+        atom, result = await Request().send_async_request(f"/channels/{self.id}/permissions/{user_or_role_id}",
+                                                          "DELETE", self.__token)
+
+        if atom == 0:
+            return self
+        else:
+            raise DeleteChannelPermissionsFailed(result)

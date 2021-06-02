@@ -62,3 +62,15 @@ class UnpinMessageFailed(Exception):
     """Raises when unpinning a message is failed."""
 
     pass
+
+
+class EditChannelPermissionsFailed(Exception):
+    """Raises when editing the channel permissions is failed."""
+
+    pass
+
+
+class DeleteChannelPermissionsFailed(Exception):
+    """Raises when deleting the channel permissions is failed."""
+
+    pass
