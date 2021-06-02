@@ -1,6 +1,6 @@
 from dataclasses import dataclass
-from typing import Union
 from datetime import datetime
+from typing import Union
 
 
 @dataclass

@@ -161,7 +161,7 @@ class Session:
                                         ))
 
                             if websocket_result['t'] in [
-                                    k['EVENT'] for k in self.events]:
+                                k['EVENT'] for k in self.events]:
                                 # Message Events
                                 if websocket_result['t'] == "MESSAGE_CREATE":
                                     loop.create_task(

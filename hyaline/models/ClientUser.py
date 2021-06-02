@@ -140,7 +140,7 @@ class ClientUser:
 
         if atom == 0:
             filtered = [
-                Message(i, self.__token).id for i in result][::-1][:limit]
+                           Message(i, self.__token).id for i in result][::-1][:limit]
         else:
             raise FetchChannelHistoryFailed(result)
 

@@ -160,3 +160,75 @@ class Guild:
             return Member(result, self.__token)
         else:
             raise EditGuildMemberFailed(result)
+
+    async def fetch_emoji_list(self):
+        """Fetch all emojis in the guild."""
+
+        from .Emoji import Emoji
+
+        atom, result = await Request().send_async_request(f"/guilds/{self.id}/emojis", "GET", self.__token)
+
+        if atom == 0:
+            return [Emoji(i, self.__token) for i in result]
+        else:
+            raise FetchGuildEmojiListFailed(result)
+
+    async def fetch_emoji(self, emoji_id: str):
+        """Fetch guild emoji with id."""
+
+        from .Emoji import Emoji
+
+        atom, result = await Request().send_async_request(f"/guilds/{self.id}/emojis/{emoji_id}", "GET", self.__token)
+
+        if atom == 0:
+            return Emoji(result, self.__token)
+        else:
+            raise FetchGuildEmojiFailed(result)
+
+    async def create_emoji(self, options=None):
+        """Create guild emoji with API params."""
+
+        if options is None:
+            options = {}
+
+        raise_error(options, "options", dict)
+
+        from .Emoji import Emoji
+
+        atom, result = await Request().send_async_request(f"/guilds/{self.id}/emojis", "POST", self.__token, options)
+
+        if atom == 0:
+            return Emoji(result, self.__token)
+        else:
+            raise CreateGuildEmojiFailed(result)
+
+    async def edit_emoji(self, emoji_id: str, options=None):
+        """Edit guild emoji with API params."""
+        if options is None:
+            options = {}
+
+        raise_error(emoji_id, "emoji_id", str)
+        raise_error(options, "options", dict)
+
+        from .Emoji import Emoji
+
+        atom, result = await Request().send_async_request(f"/guilds/{self.id}/emojis/{emoji_id}", "PATCH", self.__token,
+                                                          options)
+
+        if atom == 0:
+            return Emoji(result, self.__token)
+        else:
+            raise EditGuildEmojiFailed(result)
+
+    async def remove_emoji(self, emoji_id: str):
+        """Remove guild emoji with id."""
+
+        raise_error(emoji_id, "emoji_id", str)
+
+        atom, result = await Request().send_async_request(f"/guilds/{self.id}/emojis/{emoji_id}", "DELETE",
+                                                          self.__token)
+
+        if atom == 0:
+            return True
+        else:
+            raise DeleteGuildEmojiFailed(result)

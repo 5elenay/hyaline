@@ -44,3 +44,33 @@ class EditGuildMemberFailed(Exception):
     """Raises when editing the guild member is failed."""
 
     pass
+
+
+class FetchGuildEmojiListFailed(Exception):
+    """Raises when fetching the emoji list is failed."""
+
+    pass
+
+
+class FetchGuildEmojiFailed(Exception):
+    """Raises when fetching the guild emoji is failed."""
+
+    pass
+
+
+class CreateGuildEmojiFailed(Exception):
+    """Raises when creating a guild emoji is failed."""
+
+    pass
+
+
+class EditGuildEmojiFailed(Exception):
+    """Raises when editing a guild emoji is failed."""
+
+    pass
+
+
+class DeleteGuildEmojiFailed(Exception):
+    """Raises when delete a guild emoji is failed."""
+
+    pass
