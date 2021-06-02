@@ -32,7 +32,7 @@ class Session:
 
         if "INTENTS" not in options:
             raise IntentNotFoundError(
-                "Please pass a intent number (https://discord.com/developers/docs/topics/gateway#gateway-intents) in session option. For calculation: https://ziad87.net/intents/")
+                "Please pass a intent.")
 
         raise_error(options['TOKEN'], "TOKEN", str)
         raise_error(options['INTENTS'], "INTENTS", int)
