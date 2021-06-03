@@ -16,3 +16,13 @@ class Channel:
     GUILD_PRIVATE_THREAD = 12  # a temporary sub-channel within a GUILD_TEXT channel that is only viewable by
     # those invited and those with the MANAGE_THREADS permission
     GUILD_STAGE_VOICE = 13  # a voice channel for hosting events with an audience
+
+
+@dataclass
+class Activity:
+    GAMING = 0
+    STREAMING = 1
+    LISTENING = 2
+    WATCHING = 3
+    CUSTOM = 4
+    COMPETING = 5

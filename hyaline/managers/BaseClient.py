@@ -1,7 +1,6 @@
 import asyncio
 import json
 import sys
-import time
 import traceback
 from typing import Callable
 
@@ -54,6 +53,7 @@ class Session:
         self.gateway = "wss://gateway.discord.gg/?v=9&encoding=json"
         self.ws = None
         self.client = None
+        self.session_id = None
         self.event_loop = asyncio.get_event_loop()
 
         self.events = []
@@ -123,6 +123,10 @@ class Session:
                 "EVENT": "GUILD_MEMBER_UPDATE",
                 "FUNCTION": self.client.update_guild_member
             },
+            {
+                "EVENT": "READY",
+                "FUNCTION": self.__get_session_id
+            }
         )
 
         # Load Cache System
@@ -134,31 +138,41 @@ class Session:
     async def __connect_to_gateway(self):
         self.ws = await aiohttp.ClientSession().ws_connect(self.gateway)
 
+    async def __get_session_id(self, packet):
+        self.session_id = packet.get('session_id')
+
     async def __identify(self, packet):
         heartbeat = packet['d']['heartbeat_interval']
 
-        await self.ws.send_str(json.dumps({
-            "op": 2,
-            "d": {
-                "token": self.token,
-                "intents": self.intents,
-                "properties": {
-                    "$os": "linux",
-                    "$browser": "5elenay/hyaline",
-                    "$device": "5elenay/hyaline"
+        if self.session_id is None:
+            await self.ws.send_json({
+                "op": self.IDENTIFY,
+                "d": {
+                    "token": self.token,
+                    "intents": self.intents,
+                    "properties": {
+                        "$os": "linux",
+                        "$browser": "5elenay/hyaline",
+                        "$device": "5elenay/hyaline"
+                    }
                 }
-            }
-        }))
+            })
+        else:
+            await self.ws.send_json({
+                "op": self.RESUME,
+                "d": {
+                    "token": self.token,
+                    "session_id": self.session_id
+                }
+            })
 
         # Keep Connection Alive:
         async def _keep_alive():
             while True:
-                started = time.time()
-
-                await self.ws.send_str(json.dumps({
-                    "op": 1,
+                await self.ws.send_json({
+                    "op": self.HEARTBEAT,
                     "d": None
-                }))
+                })
 
                 await asyncio.sleep(heartbeat / 1000)
 
@@ -193,12 +207,23 @@ class Session:
     async def __receive(self):
         while True:
             packet = await self.ws.receive()
-            packet = json.loads(packet.data)
 
+            # WebSocket Error
+            if isinstance(packet.data, int) and len(str(packet.data)) == 4:
+                print("WebSocket Exception Found: {0} ({1})".format(packet.data, packet.extra))
+                continue
+            elif isinstance(packet.data, type(None)):
+                # WebSocket Closed
+                if packet.type == 0x101:
+                    return 0x0
+
+            packet = json.loads(packet.data)
             print(packet)
 
             if packet['op'] == self.HELLO:
                 await self.__identify(packet)
+            elif packet['op'] == self.RECONNECT:
+                return 0x1
             elif packet['op'] == self.DISPATCH:
                 try:
                     self.event_loop.create_task(self.__handle_event(packet))
@@ -211,9 +236,24 @@ class Session:
         await self.__check_token()
         self.__load_events()
         await self.__connect_to_gateway()
-        await self.__receive()
+        result = await self.__receive()
+
+        # Reconnect
+        if result == 0x1:
+            await self.__start_client()
+
+    async def change_presence(self, params: dict = None):
+        if params is None:
+            params = {}
+
+        raise_error(params, "params", dict)
+
+        await self.ws.send_json({
+            "op": self.PRESENCE,
+            "d": params
+        })
 
     def start(self):
         """Start the session."""
-        
+
         self.event_loop.run_until_complete(self.__start_client())
