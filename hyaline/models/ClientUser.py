@@ -24,12 +24,12 @@ class ClientUser:
             "guild": []
         }
 
-    async def _add_message_cache(self, message):
+    async def add_message_cache(self, message):
         """Add message to cache"""
 
         self.cache['message'].append(message)
 
-    async def _remove_message_cache(self, packet):
+    async def remove_message_cache(self, packet):
         """Remove deleted message from cache"""
 
         for index, cache in enumerate(self.cache['message']):
@@ -37,7 +37,7 @@ class ClientUser:
                 del self.cache['message'][index]
                 break
 
-    async def _bulk_delete_message_cache(self, packet):
+    async def bulk_delete_message_cache(self, packet):
         """Remove Bulk-deleted message from cache"""
 
         shift = 0
@@ -46,7 +46,7 @@ class ClientUser:
                 del self.cache['message'][index - shift]
                 shift += 1
 
-    async def _update_message_cache(self, message):
+    async def update_message_cache(self, message):
         """Update message from cache"""
 
         for index, cache in enumerate(self.cache['message']):
@@ -54,12 +54,12 @@ class ClientUser:
                 self.cache['message'][index] = message
                 break
 
-    async def _add_guild_cache(self, guild):
+    async def add_guild_cache(self, guild):
         """Add a guild to cache."""
 
         self.cache["guild"].append(guild)
 
-    async def _update_guild_cache(self, guild):
+    async def update_guild_cache(self, guild):
         """Update a guild from cache."""
 
         for index, cache in enumerate(self.cache['guild']):
@@ -67,7 +67,7 @@ class ClientUser:
                 self.cache['guild'][index] = guild
                 break
 
-    async def _remove_guild_cache(self, packet):
+    async def remove_guild_cache(self, packet):
         """Remove a guild from cache."""
 
         for index, cache in enumerate(self.cache['guild'][:]):
@@ -75,7 +75,7 @@ class ClientUser:
                 del self.cache['guild'][index]
                 break
 
-    async def _add_guild_member(self, guild_id, member):
+    async def add_guild_member(self, guild_id, member):
         """Add a guild member to guild cache."""
 
         for index, cache in enumerate(self.cache['guild']):
@@ -83,7 +83,7 @@ class ClientUser:
                 self.cache['guild'][index].members.append(member)
                 break
 
-    async def _remove_guild_member(self, guild_id, user):
+    async def remove_guild_member(self, guild_id, user):
         """Remove a guild member from guild cache."""
 
         for index, cache in enumerate(self.cache['guild']):
@@ -94,7 +94,7 @@ class ClientUser:
                         break
                 break
 
-    async def _update_guild_member(self, guild_id, member):
+    async def update_guild_member(self, guild_id, member):
         """Update a guild member from guild cache."""
 
         for index, cache in enumerate(self.cache['guild']):
