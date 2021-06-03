@@ -232,3 +232,31 @@ class Guild:
             return True
         else:
             raise DeleteGuildEmojiFailed(result)
+
+    async def add_role(self, member_id: str, role_id: str):
+        """Add a role to guild member."""
+
+        raise_error(member_id, "member_id", str)
+        raise_error(role_id, "role_id", str)
+
+        atom, result = await Request().send_async_request(f"/guilds/{self.id}/members/{member_id}/roles/{role_id}",
+                                                          "PUT", self.__token)
+
+        if atom == 0:
+            return self, member_id, role_id
+        else:
+            raise AddRoleToGuildMemberFailed(result)
+
+    async def remove_role(self, member_id: str, role_id: str):
+        """Remove a role from guild member."""
+
+        raise_error(member_id, "member_id", str)
+        raise_error(role_id, "role_id", str)
+
+        atom, result = await Request().send_async_request(f"/guilds/{self.id}/members/{member_id}/roles/{role_id}",
+                                                          "DELETE", self.__token)
+
+        if atom == 0:
+            return self, member_id, role_id
+        else:
+            raise RemoveRoleFromGuildMemberFailed(result)

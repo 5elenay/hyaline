@@ -74,3 +74,15 @@ class DeleteGuildEmojiFailed(Exception):
     """Raises when delete a guild emoji is failed."""
 
     pass
+
+
+class AddRoleToGuildMemberFailed(Exception):
+    """Raises when adding a role to guild member is failed."""
+
+    pass
+
+
+class RemoveRoleFromGuildMemberFailed(Exception):
+    """Raises when removing a role from guild member is failed."""
+
+    pass
