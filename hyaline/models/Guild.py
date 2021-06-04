@@ -260,3 +260,31 @@ class Guild:
             return self, member_id, role_id
         else:
             raise RemoveRoleFromGuildMemberFailed(result)
+
+    async def kick(self, member_id: str):
+        """Kick a member from guild."""
+
+        raise_error(member_id, "member_id", str)
+
+        atom, result = await Request().send_async_request(f"/guilds/{self.id}/members/{member_id}", "DELETE", self.__token)
+
+        if atom == 0:
+            return self, member_id
+        else:
+            raise KickMemberFromGuildFailed(result)
+
+    async def ban(self, member_id: str, params: dict = None):
+        """Ban a member from guild."""
+
+        if params is None:
+            params = {}
+
+        raise_error(member_id, "member_id", str)
+        raise_error(params, "params", dict)
+
+        atom, result = await Request().send_async_request(f"/guilds/{self.id}/bans/{member_id}", "PUT", self.__token, params)
+
+        if atom == 0:
+            return self, member_id
+        else:
+            raise KickMemberFromGuildFailed(result)

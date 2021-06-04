@@ -86,3 +86,8 @@ class RemoveRoleFromGuildMemberFailed(Exception):
     """Raises when removing a role from guild member is failed."""
 
     pass
+
+class KickMemberFromGuildFailed(Exception):
+    """Raises when kicking a member from guild is failed."""
+
+    pass
