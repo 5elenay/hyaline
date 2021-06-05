@@ -94,6 +94,18 @@ class KickMemberFromGuildFailed(Exception):
     pass
 
 
+class BanMemberFromGuildFailed(Exception):
+    """Raises when banning a member from guild is failed."""
+
+    pass
+
+
+class UnbanGuildMemberFailed(Exception):
+    """Raises when unbanning a user from guild is failed."""
+
+    pass
+
+
 class FetchGuildBansFailed(Exception):
     """Raises when fetching the guild bans is failed."""
 
@@ -102,5 +114,11 @@ class FetchGuildBansFailed(Exception):
 
 class FetchGuildBanFailed(Exception):
     """Raises when fetching the member guild ban is failed."""
+
+    pass
+
+
+class FetchGuildRolesFailed(Exception):
+    """Raises when fetching the guild roles is failed."""
 
     pass

@@ -289,7 +289,20 @@ class Guild:
         if atom == 0:
             return self, member_id
         else:
-            raise KickMemberFromGuildFailed(result)
+            raise BanMemberFromGuildFailed(result)
+
+    async def unban(self, member_id: str):
+        """Unban a member from guild."""
+
+        raise_error(member_id, "member_id", str)
+
+        atom, result = await Request().send_async_request(f"/guilds/{self.id}/bans/{member_id}", "DELETE", self.__token,
+                                                          {})
+
+        if atom == 0:
+            return self, member_id
+        else:
+            raise UnbanGuildMemberFailed(result)
 
     async def fetch_bans(self):
         """Fetch all guild bans."""
@@ -324,3 +337,15 @@ class Guild:
             return True
         else:
             return False
+
+    async def fetch_roles(self):
+        """Fetch all roles from guild."""
+
+        from .Role import Role
+
+        atom, result = await Request().send_async_request(f"/guilds/{self.id}/roles", "GET", self.__token)
+
+        if atom == 0:
+            return [Role(i) for i in result]
+        else:
+            return FetchGuildRolesFailed(result)
