@@ -87,7 +87,20 @@ class RemoveRoleFromGuildMemberFailed(Exception):
 
     pass
 
+
 class KickMemberFromGuildFailed(Exception):
     """Raises when kicking a member from guild is failed."""
+
+    pass
+
+
+class FetchGuildBansFailed(Exception):
+    """Raises when fetching the guild bans is failed."""
+
+    pass
+
+
+class FetchGuildBanFailed(Exception):
+    """Raises when fetching the member guild ban is failed."""
 
     pass

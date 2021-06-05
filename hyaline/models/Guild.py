@@ -266,7 +266,8 @@ class Guild:
 
         raise_error(member_id, "member_id", str)
 
-        atom, result = await Request().send_async_request(f"/guilds/{self.id}/members/{member_id}", "DELETE", self.__token)
+        atom, result = await Request().send_async_request(f"/guilds/{self.id}/members/{member_id}", "DELETE",
+                                                          self.__token)
 
         if atom == 0:
             return self, member_id
@@ -282,9 +283,44 @@ class Guild:
         raise_error(member_id, "member_id", str)
         raise_error(params, "params", dict)
 
-        atom, result = await Request().send_async_request(f"/guilds/{self.id}/bans/{member_id}", "PUT", self.__token, params)
+        atom, result = await Request().send_async_request(f"/guilds/{self.id}/bans/{member_id}", "PUT", self.__token,
+                                                          params)
 
         if atom == 0:
             return self, member_id
         else:
             raise KickMemberFromGuildFailed(result)
+
+    async def fetch_bans(self):
+        """Fetch all guild bans."""
+
+        from .Ban import Ban
+
+        atom, result = await Request().send_async_request(f"/guilds/{self.id}/bans", "GET", self.__token)
+
+        if atom == 0:
+            return [Ban(i, self.__token) for i in result]
+        else:
+            raise FetchGuildBansFailed(result)
+
+    async def fetch_member_ban(self, member_id: str):
+        """Fetch an user guild ban."""
+
+        from .Ban import Ban
+
+        atom, result = await Request().send_async_request(f"/guilds/{self.id}/bans/{member_id}", "GET", self.__token)
+
+        if atom == 0:
+            return Ban(result, self.__token)
+        else:
+            raise FetchGuildBanFailed(result)
+
+    async def is_banned(self, member_id: str) -> bool:
+        """Check is guild member banned from guild."""
+
+        atom, result = await Request().send_async_request(f"/guilds/{self.id}/bans/{member_id}", "GET", self.__token)
+
+        if atom == 0:
+            return True
+        else:
+            return False
