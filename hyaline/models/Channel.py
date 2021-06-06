@@ -68,7 +68,7 @@ class Channel:
     async def delete(self):
         """Delete current channel."""
 
-        atom, result = await Request().send_async_request(f"/channels/{self.id}", "DELETE", self.__token)
+        atom, result = await Request().send_async_request(f"/channels/{self.id}", "DELETE", self.__token, {})
 
         if atom == 0:
             return Channel(result, self.__token)
@@ -158,7 +158,7 @@ class Channel:
         raise_error(message_id, "message_id", str)
 
         atom, result = await Request().send_async_request(f"/channels/{self.id}/pins/{message_id}", "DELETE",
-                                                          self.__token)
+                                                          self.__token, {})
 
         if atom == 0:
             return True
@@ -183,9 +183,19 @@ class Channel:
         raise_error(user_or_role_id, "user_or_role_id", str)
 
         atom, result = await Request().send_async_request(f"/channels/{self.id}/permissions/{user_or_role_id}",
-                                                          "DELETE", self.__token)
+                                                          "DELETE", self.__token, {})
 
         if atom == 0:
             return self
         else:
             raise DeleteChannelPermissionsFailed(result)
+
+    async def trigger_typing(self):
+        """Start typing in this channel."""
+
+        atom, result = await Request().send_async_request(f"/channels/{self.id}/typing", "POST", self.__token)
+
+        if atom == 0:
+            return self
+        else:
+            raise TriggerTypingFailed(result)

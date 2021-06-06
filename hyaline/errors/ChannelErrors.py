@@ -74,3 +74,9 @@ class DeleteChannelPermissionsFailed(Exception):
     """Raises when deleting the channel permissions is failed."""
 
     pass
+
+
+class TriggerTypingFailed(Exception):
+    """Raises when trigger the typing is failed."""
+
+    pass

@@ -7,6 +7,7 @@ from typing import Callable
 import aiohttp
 
 from ..errors.SessionErrors import TokenNotFoundError, InvalidTokenError, IntentNotFoundError
+from ..models.Channel import Channel
 from ..models.ClientUser import ClientUser
 from ..models.Guild import Guild
 from ..models.Member import Member
@@ -197,6 +198,13 @@ class Session:
             elif event_type == "GUILD_MEMBER_REMOVE":
                 filtered = self.__filter_events((event_type,), event_data['guild_id'],
                                                 User(event_data['user'], self.token))
+            elif event_type in ("GUILD_BAN_ADD", "GUILD_BAN_REMOVE"):
+                guild_id = event_data['guild_id']
+                del event_data['guild_id']
+
+                filtered = self.__filter_events((event_type,), guild_id, User(event_data, self.token))
+            elif event_type in ("CHANNEL_CREATE", "CHANNEL_UPDATE", "CHANNEL_DELETE"):
+                filtered = self.__filter_events((event_type,), Channel(event_data, self.token))
             else:
                 filtered = self.__filter_events((event_type,), event_data)
 
