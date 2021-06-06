@@ -122,3 +122,21 @@ class FetchGuildRolesFailed(Exception):
     """Raises when fetching the guild roles is failed."""
 
     pass
+
+
+class CreateGuildRoleFailed(Exception):
+    """Raises when creating new guild role is failed."""
+
+    pass
+
+
+class EditGuildRoleFailed(Exception):
+    """Raises when editing the guild role is failed."""
+
+    pass
+
+
+class DeleteGuildRoleFailed(Exception):
+    """Raises when deleting the guild role is failed."""
+
+    pass

@@ -318,6 +318,7 @@ class Guild:
 
     async def fetch_member_ban(self, member_id: str):
         """Fetch an user guild ban."""
+        raise_error(member_id, "member_id", str)
 
         from .Ban import Ban
 
@@ -330,6 +331,7 @@ class Guild:
 
     async def is_banned(self, member_id: str) -> bool:
         """Check is guild member banned from guild."""
+        raise_error(member_id, "member_id", str)
 
         atom, result = await Request().send_async_request(f"/guilds/{self.id}/bans/{member_id}", "GET", self.__token)
 
@@ -349,3 +351,67 @@ class Guild:
             return [Role(i) for i in result]
         else:
             return FetchGuildRolesFailed(result)
+
+    async def create_role(self, params=None):
+        """Create new guild role with API params."""
+
+        from .Role import Role
+
+        if params is None:
+            params = {}
+
+        raise_error(params, "params", dict)
+
+        atom, result = await Request().send_async_request(f"/guilds/{self.id}/roles", "POST", self.__token, params)
+
+        if atom == 0:
+            return Role(result)
+        else:
+            return CreateGuildRoleFailed(result)
+
+    async def edit_role(self, role_id: str, params=None):
+        """Edit a guild role with API params."""
+
+        from .Role import Role
+
+        if params is None:
+            params = {}
+
+        raise_error(role_id, "role_id", str)
+        raise_error(params, "params", dict)
+
+        atom, result = await Request().send_async_request(f"/guilds/{self.id}/roles/{role_id}", "PATCH", self.__token,
+                                                          params)
+
+        if atom == 0:
+            return Role(result)
+        else:
+            return EditGuildRoleFailed(result)
+
+    async def edit_role_position(self, *args):
+        """Edit a guild role with API params."""
+
+        from .Role import Role
+
+        for index, arg in enumerate(args):
+            raise_error(arg, f"args #{index}", dict)
+
+        atom, result = await Request().send_async_request(f"/guilds/{self.id}/roles", "PATCH", self.__token, [*args])
+
+        if atom == 0:
+            return [Role(i) for i in result]
+        else:
+            return EditGuildRoleFailed(result)
+
+    async def delete_role(self, role_id: str):
+        """Delete a guild role."""
+
+        raise_error(role_id, "role_id", str)
+
+        atom, result = await Request().send_async_request(f"/guilds/{self.id}/roles/{role_id}", "DELETE", self.__token,
+                                                          {})
+
+        if atom == 0:
+            return self, role_id
+        else:
+            return DeleteGuildRoleFailed(result)
