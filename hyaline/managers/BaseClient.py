@@ -125,6 +125,18 @@ class Session:
                 "FUNCTION": self.client.update_guild_member
             },
             {
+                "EVENT": "CHANNEL_CREATE",
+                "FUNCTION": self.client.add_guild_channel
+            },
+            {
+                "EVENT": "CHANNEL_UPDATE",
+                "FUNCTION": self.client.update_guild_channel
+            },
+            {
+                "EVENT": "CHANNEL_DELETE",
+                "FUNCTION": self.client.remove_guild_channel
+            },
+            {
                 "EVENT": "READY",
                 "FUNCTION": self.__get_session_id
             }

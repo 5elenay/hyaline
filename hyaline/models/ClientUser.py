@@ -105,6 +105,36 @@ class ClientUser:
                         break
                 break
 
+    async def add_guild_channel(self, channel):
+        """Add a guild channel to guild cache."""
+
+        for index, cache in enumerate(self.cache['guild']):
+            if hasattr(channel, "guild_id") and cache.id == channel.guild_id:
+                self.cache['guild'][index].channels.append(channel)
+                break
+
+    async def remove_guild_channel(self, channel):
+        """Remove a guild channel from guild cache."""
+
+        for index, cache in enumerate(self.cache['guild']):
+            if hasattr(channel, "guild_id") and cache.id == channel.guild_id:
+                for channel_index, cache_channel in enumerate(cache.channels):
+                    if cache_channel.id == channel.id:
+                        self.cache['guild'][index].channels.pop(channel_index)
+                        break
+                break
+
+    async def update_guild_channel(self, channel):
+        """Update a guild channel from guild cache."""
+
+        for index, cache in enumerate(self.cache['guild']):
+            if hasattr(channel, "guild_id") and cache.id == channel.guild_id:
+                for channel_index, cache_channel in enumerate(cache.channels):
+                    if cache_channel.id == channel.id:
+                        self.cache['guild'][index].channels[channel_index] = channel
+                        break
+                break
+
     async def get_channel(self, channel_id: str, fetch: bool = False):
         """Get channel with id."""
         raise_error(channel_id, "id", str)
