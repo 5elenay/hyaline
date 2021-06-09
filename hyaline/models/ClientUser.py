@@ -11,8 +11,9 @@ from ..utils.WrongType import raise_error
 @dataclass
 class ClientUser:
     # Attrs
-    def __init__(self, json: dict, token: str) -> None:
+    def __init__(self, json: dict, token: str, max_messages: int) -> None:
         self.__token: str = token
+        self.max_messages = max_messages
 
         for key in json:
             setattr(self, key, json[key])
@@ -28,6 +29,9 @@ class ClientUser:
         """Add message to cache"""
 
         self.cache['message'].append(message)
+        
+        if len(self.cache['message']) > self.max_messages:
+            del self.cache['message'][0]
 
     async def remove_message_cache(self, packet):
         """Remove deleted message from cache"""

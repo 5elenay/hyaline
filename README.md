@@ -12,6 +12,7 @@ import hyaline
 from hyaline.helpers.Intents import ALL
 
 # Setup session configurations.
+# NOTE: If you want to limit message cache add MAX_MESSAGES
 session = hyaline.Session({
     "TOKEN": "token",
     "INTENTS": ALL

@@ -49,6 +49,12 @@ class Session:
         raise_error(options['TOKEN'], "TOKEN", str)
         raise_error(options['INTENTS'], "INTENTS", int)
 
+        if 'MAX_MESSAGES' in options:
+            raise_error(options['MAX_MESSAGES'], "MAX_MESSAGES", int)
+            self.max_messages = options['MAX_MESSAGES']
+        else:
+            self.max_messages = 100
+
         self.token = options['TOKEN']
         self.intents = options['INTENTS']
         self.gateway = "wss://gateway.discord.gg/?v=9&encoding=json"
@@ -80,7 +86,7 @@ class Session:
         if atom == 1:
             raise InvalidTokenError("Token is invalid. Please check your token!")
         else:
-            self.client = ClientUser(result, self.token)
+            self.client = ClientUser(result, self.token, self.max_messages)
 
     def __load_events(self):
         cache_events = (
