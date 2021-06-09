@@ -140,3 +140,15 @@ class DeleteGuildRoleFailed(Exception):
     """Raises when deleting the guild role is failed."""
 
     pass
+
+
+class ChangeClientUserNicknameFailed(Exception):
+    """Raises when changing the client-user guild nickname is failed."""
+
+    pass
+
+
+class FetchGuildVanityUrlFailed(Exception):
+    """Raises when fetching the vanity url is failed."""
+
+    pass

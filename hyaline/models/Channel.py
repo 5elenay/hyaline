@@ -163,7 +163,7 @@ class Channel:
         if atom == 0:
             return True
         else:
-            raise PinMessageFailed(result)
+            raise UnpinMessageFailed(result)
 
     async def edit_permissions(self, user_or_role_id: str, params: dict):
         """Edit channel permission. (bitwise must be string.)"""

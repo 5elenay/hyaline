@@ -415,3 +415,30 @@ class Guild:
             return self, role_id
         else:
             return DeleteGuildRoleFailed(result)
+
+    async def change_nickname(self, params=None):
+        """Change client-user guild nickname with API params."""
+        if params is None:
+            params = {}
+
+        raise_error(params, "params", dict)
+
+        atom, result = await Request().send_async_request(f"/guilds/{self.id}/members/@me/nick", "PATCH", self.__token,
+                                                          params)
+
+        if atom == 0:
+            return result
+        else:
+            return ChangeClientUserNicknameFailed(result)
+
+    async def fetch_url(self):
+        """Fetch guild vanity url."""
+
+        from .Invite import Invite
+
+        atom, result = await Request().send_async_request(f"/guilds/{self.id}/vanity-url", "GET", self.__token)
+
+        if atom == 0:
+            return Invite(result, self.__token)
+        else:
+            return FetchGuildVanityUrlFailed(result)

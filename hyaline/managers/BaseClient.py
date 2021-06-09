@@ -238,7 +238,7 @@ class Session:
                     return 0x0
 
             packet = json.loads(packet.data)
-            print(packet)
+            # print(packet)
 
             if packet['op'] == self.HELLO:
                 await self.__identify(packet)
