@@ -2,11 +2,11 @@
 `<ClientUser>`  is the current session user object with some extra metadata. Also `<ClientUser>` has some functions for help us.
 
 # Functions
-## get_channel
+## get_guild_channel
 Get a channel. (from cache.)
 - Returns `<Channel>` object.
 ```py
-session.client.get_channel(channel_id: str)
+session.client.get_guild_channel(channel_id: str)
 # channel_id -> The channel id
 ```
 ## fetch_channel
