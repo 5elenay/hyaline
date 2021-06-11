@@ -56,6 +56,13 @@ Fetch all pinned messages.
 ```py
 await channel.pinned_messages()
 ```
+## delete_message
+Delete channel message.
+- Returns self.
+```py
+await channel.delete_message(message_id: str)
+# message_id -> Message id.
+```
 ## pin_message
 Pin a message.
 - Returns `True`.

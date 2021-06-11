@@ -69,8 +69,8 @@ class Session:
     def event(self, event_name: str, fn: Callable) -> True:
         """Create new event."""
 
-        raise_error(event_name, "Event Name", str)
-        raise_error(fn, "Function", type(lambda: True))
+        raise_error(event_name, "event_name", str)
+        raise_error(fn, "function", type(lambda: True))
 
         self.__will_loaded_events.append({
             "EVENT": event_name,
@@ -202,33 +202,36 @@ class Session:
             event['FUNCTION'](*args) for event in self.events if event['EVENT'] in events
         ]
 
+    def __return_filtered_events(self, event_type, event_data):
+        if event_type in ("MESSAGE_CREATE", "MESSAGE_UPDATE"):
+            filtered = self.__filter_events((event_type,), Message(event_data, self.token))
+        elif event_type in ("GUILD_CREATE", "GUILD_UPDATE"):
+            filtered = self.__filter_events((event_type,), Guild(event_data, self.token))
+        elif event_type in ("GUILD_MEMBER_ADD", "GUILD_MEMBER_UPDATE"):
+            filtered = self.__filter_events((event_type,), event_data['guild_id'], Member(event_data, self.token))
+        elif event_type == "GUILD_MEMBER_REMOVE":
+            filtered = self.__filter_events((event_type,), event_data['guild_id'],
+                                            User(event_data['user'], self.token))
+        elif event_type in ("GUILD_BAN_ADD", "GUILD_BAN_REMOVE"):
+            guild_id = event_data['guild_id']
+            del event_data['guild_id']
+
+            filtered = self.__filter_events((event_type,), guild_id, User(event_data, self.token))
+        elif event_type in ("CHANNEL_CREATE", "CHANNEL_UPDATE", "CHANNEL_DELETE"):
+            filtered = self.__filter_events((event_type,), Channel(event_data, self.token))
+        else:
+            filtered = self.__filter_events((event_type,), event_data)
+
+        return filtered
+
     async def __handle_event(self, packet):
         event_type = packet['t']
         event_data = packet['d']
 
-        if event_type in [event['EVENT'] for event in self.events]:
-            if event_type in ("MESSAGE_CREATE", "MESSAGE_UPDATE"):
-                filtered = self.__filter_events((event_type,), Message(event_data, self.token))
-            elif event_type in ("GUILD_CREATE", "GUILD_UPDATE"):
-                filtered = self.__filter_events((event_type,), Guild(event_data, self.token))
-            elif event_type in ("GUILD_MEMBER_ADD", "GUILD_MEMBER_UPDATE"):
-                filtered = self.__filter_events((event_type,), event_data['guild_id'], Member(event_data, self.token))
-            elif event_type == "GUILD_MEMBER_REMOVE":
-                filtered = self.__filter_events((event_type,), event_data['guild_id'],
-                                                User(event_data['user'], self.token))
-            elif event_type in ("GUILD_BAN_ADD", "GUILD_BAN_REMOVE"):
-                guild_id = event_data['guild_id']
-                del event_data['guild_id']
-
-                filtered = self.__filter_events((event_type,), guild_id, User(event_data, self.token))
-            elif event_type in ("CHANNEL_CREATE", "CHANNEL_UPDATE", "CHANNEL_DELETE"):
-                filtered = self.__filter_events((event_type,), Channel(event_data, self.token))
-            else:
-                filtered = self.__filter_events((event_type,), event_data)
+        if event_type in (event['EVENT'] for event in self.events):
+            filtered = self.__return_filtered_events(event_type, event_data)
 
             await asyncio.gather(*filtered)
-        else:
-            return None
 
     async def __receive(self):
         while True:

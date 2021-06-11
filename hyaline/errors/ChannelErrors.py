@@ -80,3 +80,8 @@ class TriggerTypingFailed(Exception):
     """Raises when trigger the typing is failed."""
 
     pass
+
+class DeleteChannelMessageFailed(Exception):
+    """Raises when deleting a channel message is failed."""
+
+    pass

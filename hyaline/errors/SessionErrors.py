@@ -56,3 +56,9 @@ class FetchGuildPreviewFailed(Exception):
     """Raises when fetching the guild preview is failed."""
 
     pass
+
+
+class CreateGuildFailed(Exception):
+    """Raises when creating new guild is failed."""
+
+    pass

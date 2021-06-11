@@ -149,7 +149,8 @@ class Message:
         """Fetch message reactions with API params."""
 
         if options is None:
-            options = {"limit": 25}
+            options = {}
+
         from .User import User
 
         raise_error(emoji, "emoji", str)

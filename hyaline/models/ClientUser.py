@@ -18,8 +18,6 @@ class ClientUser:
         for key in json:
             setattr(self, key, json[key])
 
-        self.channels: list = []
-
         self.cache: dict = {
             "message": [],
             "guild": []
@@ -29,7 +27,7 @@ class ClientUser:
         """Add message to cache"""
 
         self.cache['message'].append(message)
-        
+
         if len(self.cache['message']) > self.max_messages:
             del self.cache['message'][0]
 
@@ -139,25 +137,27 @@ class ClientUser:
                         break
                 break
 
-    async def get_channel(self, channel_id: str, fetch: bool = False):
-        """Get channel with id."""
+    async def fetch_channel(self, channel_id: str):
+        """Fetch channel with id."""
         raise_error(channel_id, "id", str)
-        raise_error(fetch, "fetch", bool)
 
         from .Channel import Channel
-        for channel in self.channels:
-            if channel_id == channel.id and not fetch:
-                return channel
 
         atom, result = await Request().send_async_request(f"/channels/{channel_id}", "GET", self.__token)
 
         if atom == 0:
-            channel_object = Channel(result, self.__token)
-            self.channels.append(channel_object)
-
-            return channel_object
+            return Channel(result, self.__token)
         else:
-            raise GetChannelError(f"ATOM #{atom}: #{result}")
+            raise GetChannelError(result)
+
+    def get_guild_channel(self, channel_id: str):
+        """Get channel with id. (from cache.)"""
+        raise_error(channel_id, "channel_id", str)
+
+        for guild in self.cache['guild']:
+            for channel in guild.channels:
+                if channel.id == channel_id:
+                    return channel
 
     async def bulk_delete(self, channel_id: str, limit: int = 10):
         """Bulk-delete channel messages with channel id."""
@@ -269,6 +269,14 @@ class ClientUser:
             if guild.id == guild_id:
                 return guild
 
+    def get_message(self, message_id: str):
+        """Get message from cache."""
+        raise_error(message_id, "id", str)
+
+        for message in self.cache["message"]:
+            if message.id == message_id:
+                return message
+
     async def fetch_guild(self, guild_id: str, options=None):
         """Fetch guild with API params."""
         if options is None:
@@ -324,3 +332,16 @@ class ClientUser:
             return GuildPreview(result, self.__token)
         else:
             raise FetchGuildPreviewFailed(result)
+
+    async def create_guild(self, params: dict):
+        """Create a new guild."""
+        raise_error(params, "params", dict)
+
+        from .Guild import Guild
+
+        atom, result = await Request().send_async_request(f"/guilds", "POST", self.__token, params)
+
+        if atom == 0:
+            return Guild(result, self.__token)
+        else:
+            raise CreateGuildFailed(result)

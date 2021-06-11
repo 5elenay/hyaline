@@ -75,6 +75,16 @@ class Channel:
         else:
             raise DeleteChannelFailed(result)
 
+    async def delete_message(self, message_id: str):
+        """Delete a message from channel."""
+
+        atom, result = await Request().send_async_request(f"/channels/{self.id}/messages/{message_id}", "DELETE", self.__token, {})
+
+        if atom == 0:
+            return self
+        else:
+            raise DeleteChannelMessageFailed(result)
+
     async def fetch_history(self, options=None):
         """Fetch channel history with API params."""
         if options is None:
