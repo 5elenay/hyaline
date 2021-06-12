@@ -13,7 +13,7 @@ await message.reply(params: dict = None)
 Edit your message.
 - Returns `<Message>` object.
 ```py
-await message.reply(params: dict = None)
+await message.edit(params: dict = None)
 # params -> https://discord.com/developers/docs/resources/channel#edit-message-jsonform-params
 ```
 ## delete
