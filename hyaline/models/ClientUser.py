@@ -345,3 +345,17 @@ class ClientUser:
             return Guild(result, self.__token)
         else:
             raise CreateGuildFailed(result)
+
+    async def create_dm(self, user_id: str):
+        """Create DM with user id."""
+
+        from .Channel import Channel
+
+        atom, result = await Request().send_async_request(f"/users/@me/channels", "POST", self.__token, {
+            "recipient_id": user_id
+        })
+
+        if atom == 0:
+            return Channel(result, self.__token)
+        else:
+            raise CreateDMFailed(result)

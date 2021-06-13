@@ -62,3 +62,9 @@ class CreateGuildFailed(Exception):
     """Raises when creating new guild is failed."""
 
     pass
+
+
+class CreateDMFailed(Exception):
+    """Raises when creating new DM channel is failed."""
+
+    pass

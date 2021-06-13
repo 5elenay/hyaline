@@ -152,3 +152,9 @@ class FetchGuildVanityUrlFailed(Exception):
     """Raises when fetching the vanity url is failed."""
 
     pass
+
+
+class FetchAuditLogFailed(Exception):
+    """Raises when fetching the guild audit log is failed."""
+
+    pass

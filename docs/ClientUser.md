@@ -98,15 +98,22 @@ await session.client.create_guild(params: dict)
 ```
 ## leave_guild
 Leave a guild with id.
-- Returns `True`
+- Returns `True`.
 ```py
 await session.client.leave_guild(guild_id: str)
 # guild_id -> Guild id.
 ```
 ## fetch_guild_preview
 Fetch guild preview with id.
-- Returns `<GuildPreview>` object
+- Returns `<GuildPreview>` object.
 ```py
 await session.client.fetch_guild_preview(guild_id: str)
 # guild_id -> Guild id.
+```
+## create_dm
+Create a DM Channel with user id.
+- Returns `<Channel>` object.
+```py
+await session.client.create_dm(user_id: str)
+# user_id -> User id.
 ```

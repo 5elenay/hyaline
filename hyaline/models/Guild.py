@@ -442,3 +442,20 @@ class Guild:
             return Invite(result, self.__token)
         else:
             return FetchGuildVanityUrlFailed(result)
+
+    async def fetch_audit_log(self, params: dict = None):
+        """Fetch audit log."""
+        if params is None:
+            params = {}
+
+        raise_error(params, "params", dict)
+
+        from .AuditLog import AuditLog
+
+        query_uri = f"/guilds/{self.id}/audit-logs{d2q_converter(params)}"
+        atom, result = await Request().send_async_request(query_uri, "GET", self.__token)
+
+        if atom == 0:
+            return AuditLog(result, self.__token)
+        else:
+            return FetchAuditLogFailed(result)
