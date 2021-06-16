@@ -1,5 +1,10 @@
 # Hyaline Discord API Wrapper.
 
+[![Version](https://badge.fury.io/py/hyaline.svg)](https://pypi.python.org/pypi/hyaline)
+[![Downloads](https://img.shields.io/pypi/dm/hyaline.svg)](https://pypi.python.org/pypi/hyaline)
+![Stars](https://img.shields.io/github/stars/5elenay/hyaline)
+![Commits](https://img.shields.io/github/commit-activity/w/5elenay/hyaline)
+
 **WARNING**: Hyaline is not easy to use library.
 
 Hyaline is a discord api wrapper for python. hyaline is created for discord developers and hyaline makes everything harder. _Its in alpha-release and still not finished._
