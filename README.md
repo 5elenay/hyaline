@@ -6,7 +6,10 @@ Hyaline is a discord api wrapper for python. hyaline is created for discord deve
 
 Check `./docs` folder for documentation and more informations about hyaline. Documentation is not finished. You can use python `dir()` function for get all functions, attrs in the object. Also use `help()` for get help about a function / class.
 
-**Current Version** - 0.1.0
+## Installation
+Just type `pip install hyaline` and you are ready to go!
+- **Current Version** - 0.1.0
+
 ## Change Log:
 - Added PyPi Support!
 
