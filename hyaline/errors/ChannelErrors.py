@@ -81,7 +81,20 @@ class TriggerTypingFailed(Exception):
 
     pass
 
+
 class DeleteChannelMessageFailed(Exception):
     """Raises when deleting a channel message is failed."""
+
+    pass
+
+
+class CreateWebhookFailed(Exception):
+    """Raises when creating a webhook is failed."""
+
+    pass
+
+
+class FetchWebhooksFailed(Exception):
+    """Raises when fetching the webhooks is failed."""
 
     pass

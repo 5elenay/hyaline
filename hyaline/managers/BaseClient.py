@@ -84,7 +84,8 @@ class Session:
 
         # Atom Check:
         if atom == 1:
-            raise InvalidTokenError("Token is invalid. Please check your token!")
+            raise InvalidTokenError(
+                "Token is invalid. Please check your token!")
         else:
             self.client = ClientUser(result, self.token, self.max_messages)
 
@@ -204,11 +205,14 @@ class Session:
 
     def __return_filtered_events(self, event_type, event_data):
         if event_type in ("MESSAGE_CREATE", "MESSAGE_UPDATE"):
-            filtered = self.__filter_events((event_type,), Message(event_data, self.token))
+            filtered = self.__filter_events(
+                (event_type,), Message(event_data, self.token))
         elif event_type in ("GUILD_CREATE", "GUILD_UPDATE"):
-            filtered = self.__filter_events((event_type,), Guild(event_data, self.token))
+            filtered = self.__filter_events(
+                (event_type,), Guild(event_data, self.token))
         elif event_type in ("GUILD_MEMBER_ADD", "GUILD_MEMBER_UPDATE"):
-            filtered = self.__filter_events((event_type,), event_data['guild_id'], Member(event_data, self.token))
+            filtered = self.__filter_events(
+                (event_type,), event_data['guild_id'], Member(event_data, self.token))
         elif event_type == "GUILD_MEMBER_REMOVE":
             filtered = self.__filter_events((event_type,), event_data['guild_id'],
                                             User(event_data['user'], self.token))
@@ -216,9 +220,11 @@ class Session:
             guild_id = event_data['guild_id']
             del event_data['guild_id']
 
-            filtered = self.__filter_events((event_type,), guild_id, User(event_data, self.token))
+            filtered = self.__filter_events(
+                (event_type,), guild_id, User(event_data, self.token))
         elif event_type in ("CHANNEL_CREATE", "CHANNEL_UPDATE", "CHANNEL_DELETE"):
-            filtered = self.__filter_events((event_type,), Channel(event_data, self.token))
+            filtered = self.__filter_events(
+                (event_type,), Channel(event_data, self.token))
         else:
             filtered = self.__filter_events((event_type,), event_data)
 
@@ -239,7 +245,8 @@ class Session:
 
             # WebSocket Error
             if isinstance(packet.data, int) and len(str(packet.data)) == 4:
-                print("WebSocket Exception Found: {0} ({1})".format(packet.data, packet.extra))
+                print("WebSocket Exception Found: {0} ({1})".format(
+                    packet.data, packet.extra))
                 continue
             elif isinstance(packet.data, type(None)):
                 # WebSocket Closed
@@ -258,8 +265,10 @@ class Session:
                     self.event_loop.create_task(self.__handle_event(packet))
                 except Exception as error:
                     error = getattr(error, 'original', error)
-                    print('Exception Found In Event {0}:'.format(packet['t']), file=sys.stderr)
-                    traceback.print_exception(type(error), error, error.__traceback__, file=sys.stderr)
+                    print('Exception Found In Event {0}:'.format(
+                        packet['t']), file=sys.stderr)
+                    traceback.print_exception(
+                        type(error), error, error.__traceback__, file=sys.stderr)
 
     async def __start_client(self):
         await self.__check_token()

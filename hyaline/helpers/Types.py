@@ -12,7 +12,8 @@ class Channel:
     GUILD_STORE = 6  # a channel in which game developers can sell their game on Discord
     GUILD_NEWS_THREAD = 10  # a temporary sub-channel within a GUILD_NEWS channel
     GUILD_PUBLIC_THREAD = 11  # a temporary sub-channel within a GUILD_TEXT channel
-    GUILD_PRIVATE_THREAD = 12  # a temporary sub-channel within a GUILD_TEXT channel that is only viewable by
+    # a temporary sub-channel within a GUILD_TEXT channel that is only viewable by
+    GUILD_PRIVATE_THREAD = 12
     # those invited and those with the MANAGE_THREADS permission
     GUILD_STAGE_VOICE = 13  # a voice channel for hosting events with an audience
 

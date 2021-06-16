@@ -14,6 +14,7 @@ class Guild:
     def __init__(self, json, token) -> None:
         self.id = None
         self.__token = token
+        self.request_handler = Request()
 
         from .Role import Role
         from .Emoji import Emoji
@@ -49,7 +50,7 @@ class Guild:
             params = {}
         raise_error(params, "params", dict)
 
-        atom, result = await Request().send_async_request(f"/guilds/{self.id}", "PATCH", self.__token, params)
+        atom, result = await self.request_handler.send_async_request(f"/guilds/{self.id}", "PATCH", self.__token, params)
 
         if atom == 0:
             return Guild(result, self.__token)
@@ -61,7 +62,7 @@ class Guild:
 
         from .Channel import Channel
 
-        atom, result = await Request().send_async_request(f"/guilds/{self.id}/channels", "GET", self.__token)
+        atom, result = await self.request_handler.send_async_request(f"/guilds/{self.id}/channels", "GET", self.__token)
 
         if atom == 0:
             return [Channel(i, self.__token) for i in result]
@@ -76,7 +77,7 @@ class Guild:
 
         from .Channel import Channel
 
-        atom, result = await Request().send_async_request(f"/guilds/{self.id}/channels", "POST", self.__token, params)
+        atom, result = await self.request_handler.send_async_request(f"/guilds/{self.id}/channels", "POST", self.__token, params)
 
         if atom == 0:
             return Channel(result, self.__token)
@@ -89,7 +90,7 @@ class Guild:
         for arg in args:
             raise_error(arg, "arg", dict)
 
-        atom, result = await Request().send_async_request(f"/guilds/{self.id}/channels", "PATCH", self.__token, [*args])
+        atom, result = await self.request_handler.send_async_request(f"/guilds/{self.id}/channels", "PATCH", self.__token, [*args])
 
         if atom == 0:
             return True
@@ -102,7 +103,7 @@ class Guild:
 
         from .Member import Member
 
-        atom, result = await Request().send_async_request(f"/guilds/{self.id}/members/{user_id}", "GET", self.__token)
+        atom, result = await self.request_handler.send_async_request(f"/guilds/{self.id}/members/{user_id}", "GET", self.__token)
 
         if atom == 0:
             return Member(result, self.__token)
@@ -118,8 +119,8 @@ class Guild:
 
         from .Member import Member
 
-        atom, result = await Request().send_async_request(f"/guilds/{self.id}/members{d2q_converter(options)}", "GET",
-                                                          self.__token)
+        atom, result = await self.request_handler.send_async_request(f"/guilds/{self.id}/members{d2q_converter(options)}", "GET",
+                                                                     self.__token)
 
         if atom == 0:
             return [Member(i, self.__token) for i in result]
@@ -135,8 +136,8 @@ class Guild:
 
         from .Member import Member
 
-        atom, result = await Request().send_async_request(f"/guilds/{self.id}/members/search{d2q_converter(options)}",
-                                                          "GET", self.__token)
+        atom, result = await self.request_handler.send_async_request(f"/guilds/{self.id}/members/search{d2q_converter(options)}",
+                                                                     "GET", self.__token)
 
         if atom == 0:
             return [Member(i, self.__token) for i in result]
@@ -153,8 +154,8 @@ class Guild:
 
         from .Member import Member
 
-        atom, result = await Request().send_async_request(f"/guilds/{self.id}/members/{member_id}", "PATCH",
-                                                          self.__token, options)
+        atom, result = await self.request_handler.send_async_request(f"/guilds/{self.id}/members/{member_id}", "PATCH",
+                                                                     self.__token, options)
 
         if atom == 0:
             return Member(result, self.__token)
@@ -166,7 +167,7 @@ class Guild:
 
         from .Emoji import Emoji
 
-        atom, result = await Request().send_async_request(f"/guilds/{self.id}/emojis", "GET", self.__token)
+        atom, result = await self.request_handler.send_async_request(f"/guilds/{self.id}/emojis", "GET", self.__token)
 
         if atom == 0:
             return [Emoji(i, self.__token) for i in result]
@@ -178,7 +179,7 @@ class Guild:
 
         from .Emoji import Emoji
 
-        atom, result = await Request().send_async_request(f"/guilds/{self.id}/emojis/{emoji_id}", "GET", self.__token)
+        atom, result = await self.request_handler.send_async_request(f"/guilds/{self.id}/emojis/{emoji_id}", "GET", self.__token)
 
         if atom == 0:
             return Emoji(result, self.__token)
@@ -195,7 +196,7 @@ class Guild:
 
         from .Emoji import Emoji
 
-        atom, result = await Request().send_async_request(f"/guilds/{self.id}/emojis", "POST", self.__token, options)
+        atom, result = await self.request_handler.send_async_request(f"/guilds/{self.id}/emojis", "POST", self.__token, options)
 
         if atom == 0:
             return Emoji(result, self.__token)
@@ -212,8 +213,8 @@ class Guild:
 
         from .Emoji import Emoji
 
-        atom, result = await Request().send_async_request(f"/guilds/{self.id}/emojis/{emoji_id}", "PATCH", self.__token,
-                                                          options)
+        atom, result = await self.request_handler.send_async_request(f"/guilds/{self.id}/emojis/{emoji_id}", "PATCH", self.__token,
+                                                                     options)
 
         if atom == 0:
             return Emoji(result, self.__token)
@@ -225,8 +226,8 @@ class Guild:
 
         raise_error(emoji_id, "emoji_id", str)
 
-        atom, result = await Request().send_async_request(f"/guilds/{self.id}/emojis/{emoji_id}", "DELETE",
-                                                          self.__token)
+        atom, result = await self.request_handler.send_async_request(f"/guilds/{self.id}/emojis/{emoji_id}", "DELETE",
+                                                                     self.__token)
 
         if atom == 0:
             return True
@@ -239,8 +240,8 @@ class Guild:
         raise_error(member_id, "member_id", str)
         raise_error(role_id, "role_id", str)
 
-        atom, result = await Request().send_async_request(f"/guilds/{self.id}/members/{member_id}/roles/{role_id}",
-                                                          "PUT", self.__token)
+        atom, result = await self.request_handler.send_async_request(f"/guilds/{self.id}/members/{member_id}/roles/{role_id}",
+                                                                     "PUT", self.__token)
 
         if atom == 0:
             return self, member_id, role_id
@@ -253,8 +254,8 @@ class Guild:
         raise_error(member_id, "member_id", str)
         raise_error(role_id, "role_id", str)
 
-        atom, result = await Request().send_async_request(f"/guilds/{self.id}/members/{member_id}/roles/{role_id}",
-                                                          "DELETE", self.__token)
+        atom, result = await self.request_handler.send_async_request(f"/guilds/{self.id}/members/{member_id}/roles/{role_id}",
+                                                                     "DELETE", self.__token)
 
         if atom == 0:
             return self, member_id, role_id
@@ -266,8 +267,8 @@ class Guild:
 
         raise_error(member_id, "member_id", str)
 
-        atom, result = await Request().send_async_request(f"/guilds/{self.id}/members/{member_id}", "DELETE",
-                                                          self.__token)
+        atom, result = await self.request_handler.send_async_request(f"/guilds/{self.id}/members/{member_id}", "DELETE",
+                                                                     self.__token)
 
         if atom == 0:
             return self, member_id
@@ -283,8 +284,8 @@ class Guild:
         raise_error(member_id, "member_id", str)
         raise_error(params, "params", dict)
 
-        atom, result = await Request().send_async_request(f"/guilds/{self.id}/bans/{member_id}", "PUT", self.__token,
-                                                          params)
+        atom, result = await self.request_handler.send_async_request(f"/guilds/{self.id}/bans/{member_id}", "PUT", self.__token,
+                                                                     params)
 
         if atom == 0:
             return self, member_id
@@ -296,8 +297,8 @@ class Guild:
 
         raise_error(member_id, "member_id", str)
 
-        atom, result = await Request().send_async_request(f"/guilds/{self.id}/bans/{member_id}", "DELETE", self.__token,
-                                                          {})
+        atom, result = await self.request_handler.send_async_request(f"/guilds/{self.id}/bans/{member_id}", "DELETE", self.__token,
+                                                                     {})
 
         if atom == 0:
             return self, member_id
@@ -309,7 +310,7 @@ class Guild:
 
         from .Ban import Ban
 
-        atom, result = await Request().send_async_request(f"/guilds/{self.id}/bans", "GET", self.__token)
+        atom, result = await self.request_handler.send_async_request(f"/guilds/{self.id}/bans", "GET", self.__token)
 
         if atom == 0:
             return [Ban(i, self.__token) for i in result]
@@ -322,7 +323,7 @@ class Guild:
 
         from .Ban import Ban
 
-        atom, result = await Request().send_async_request(f"/guilds/{self.id}/bans/{member_id}", "GET", self.__token)
+        atom, result = await self.request_handler.send_async_request(f"/guilds/{self.id}/bans/{member_id}", "GET", self.__token)
 
         if atom == 0:
             return Ban(result, self.__token)
@@ -333,7 +334,7 @@ class Guild:
         """Check is guild member banned from guild."""
         raise_error(member_id, "member_id", str)
 
-        atom, result = await Request().send_async_request(f"/guilds/{self.id}/bans/{member_id}", "GET", self.__token)
+        atom, result = await self.request_handler.send_async_request(f"/guilds/{self.id}/bans/{member_id}", "GET", self.__token)
 
         if atom == 0:
             return True
@@ -345,7 +346,7 @@ class Guild:
 
         from .Role import Role
 
-        atom, result = await Request().send_async_request(f"/guilds/{self.id}/roles", "GET", self.__token)
+        atom, result = await self.request_handler.send_async_request(f"/guilds/{self.id}/roles", "GET", self.__token)
 
         if atom == 0:
             return [Role(i) for i in result]
@@ -362,7 +363,7 @@ class Guild:
 
         raise_error(params, "params", dict)
 
-        atom, result = await Request().send_async_request(f"/guilds/{self.id}/roles", "POST", self.__token, params)
+        atom, result = await self.request_handler.send_async_request(f"/guilds/{self.id}/roles", "POST", self.__token, params)
 
         if atom == 0:
             return Role(result)
@@ -380,8 +381,8 @@ class Guild:
         raise_error(role_id, "role_id", str)
         raise_error(params, "params", dict)
 
-        atom, result = await Request().send_async_request(f"/guilds/{self.id}/roles/{role_id}", "PATCH", self.__token,
-                                                          params)
+        atom, result = await self.request_handler.send_async_request(f"/guilds/{self.id}/roles/{role_id}", "PATCH", self.__token,
+                                                                     params)
 
         if atom == 0:
             return Role(result)
@@ -396,7 +397,7 @@ class Guild:
         for index, arg in enumerate(args):
             raise_error(arg, f"args #{index}", dict)
 
-        atom, result = await Request().send_async_request(f"/guilds/{self.id}/roles", "PATCH", self.__token, [*args])
+        atom, result = await self.request_handler.send_async_request(f"/guilds/{self.id}/roles", "PATCH", self.__token, [*args])
 
         if atom == 0:
             return [Role(i) for i in result]
@@ -408,8 +409,8 @@ class Guild:
 
         raise_error(role_id, "role_id", str)
 
-        atom, result = await Request().send_async_request(f"/guilds/{self.id}/roles/{role_id}", "DELETE", self.__token,
-                                                          {})
+        atom, result = await self.request_handler.send_async_request(f"/guilds/{self.id}/roles/{role_id}", "DELETE", self.__token,
+                                                                     {})
 
         if atom == 0:
             return self, role_id
@@ -423,8 +424,8 @@ class Guild:
 
         raise_error(params, "params", dict)
 
-        atom, result = await Request().send_async_request(f"/guilds/{self.id}/members/@me/nick", "PATCH", self.__token,
-                                                          params)
+        atom, result = await self.request_handler.send_async_request(f"/guilds/{self.id}/members/@me/nick", "PATCH", self.__token,
+                                                                     params)
 
         if atom == 0:
             return result
@@ -436,7 +437,7 @@ class Guild:
 
         from .Invite import Invite
 
-        atom, result = await Request().send_async_request(f"/guilds/{self.id}/vanity-url", "GET", self.__token)
+        atom, result = await self.request_handler.send_async_request(f"/guilds/{self.id}/vanity-url", "GET", self.__token)
 
         if atom == 0:
             return Invite(result, self.__token)
@@ -453,7 +454,7 @@ class Guild:
         from .AuditLog import AuditLog
 
         query_uri = f"/guilds/{self.id}/audit-logs{d2q_converter(params)}"
-        atom, result = await Request().send_async_request(query_uri, "GET", self.__token)
+        atom, result = await self.request_handler.send_async_request(query_uri, "GET", self.__token)
 
         if atom == 0:
             return AuditLog(result, self.__token)

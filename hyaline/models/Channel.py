@@ -20,6 +20,7 @@ class Channel:
         from .ThreadMember import ThreadMember
 
         self.__token: str = token
+        self.request_handler = Request()
 
         for key in json:
             if key == "permission_overwrites":
@@ -44,8 +45,8 @@ class Channel:
 
         from .Message import Message
 
-        atom, result = await Request().send_async_request(f"/channels/{self.id}/messages", "POST", self.__token,
-                                                          options)
+        atom, result = await self.request_handler.send_async_request(f"/channels/{self.id}/messages", "POST", self.__token,
+                                                                     options)
 
         if atom == 0:
             return Message(result, self.__token)
@@ -58,7 +59,7 @@ class Channel:
             options = {}
         raise_error(options, "options", dict)
 
-        atom, result = await Request().send_async_request(f"/channels/{self.id}", "PATCH", self.__token, options)
+        atom, result = await self.request_handler.send_async_request(f"/channels/{self.id}", "PATCH", self.__token, options)
 
         if atom == 0:
             return Channel(result, self.__token)
@@ -68,7 +69,7 @@ class Channel:
     async def delete(self):
         """Delete current channel."""
 
-        atom, result = await Request().send_async_request(f"/channels/{self.id}", "DELETE", self.__token, {})
+        atom, result = await self.request_handler.send_async_request(f"/channels/{self.id}", "DELETE", self.__token, {})
 
         if atom == 0:
             return Channel(result, self.__token)
@@ -78,7 +79,7 @@ class Channel:
     async def delete_message(self, message_id: str):
         """Delete a message from channel."""
 
-        atom, result = await Request().send_async_request(f"/channels/{self.id}/messages/{message_id}", "DELETE", self.__token, {})
+        atom, result = await self.request_handler.send_async_request(f"/channels/{self.id}/messages/{message_id}", "DELETE", self.__token, {})
 
         if atom == 0:
             return self
@@ -93,8 +94,8 @@ class Channel:
 
         from .Message import Message
 
-        atom, result = await Request().send_async_request(f"/channels/{self.id}/messages{d2q_converter(options)}",
-                                                          "GET", self.__token)
+        atom, result = await self.request_handler.send_async_request(f"/channels/{self.id}/messages{d2q_converter(options)}",
+                                                                     "GET", self.__token)
 
         if atom == 0:
             return [Message(i, self.__token) for i in result]
@@ -107,8 +108,8 @@ class Channel:
 
         from .Message import Message
 
-        atom, result = await Request().send_async_request(f"/channels/{self.id}/messages/{message_id}", "GET",
-                                                          self.__token)
+        atom, result = await self.request_handler.send_async_request(f"/channels/{self.id}/messages/{message_id}", "GET",
+                                                                     self.__token)
 
         if atom == 0:
             return Message(result, self.__token)
@@ -119,7 +120,7 @@ class Channel:
         """Fetch channel invites."""
         from .Invite import Invite
 
-        atom, result = await Request().send_async_request(f"/channels/{self.id}/invites", "GET", self.__token)
+        atom, result = await self.request_handler.send_async_request(f"/channels/{self.id}/invites", "GET", self.__token)
 
         if atom == 0:
             return [Invite(i, self.__token) for i in result]
@@ -134,7 +135,7 @@ class Channel:
 
         from .Invite import Invite
 
-        atom, result = await Request().send_async_request(f"/channels/{self.id}/invites", "POST", self.__token, params)
+        atom, result = await self.request_handler.send_async_request(f"/channels/{self.id}/invites", "POST", self.__token, params)
 
         if atom == 0:
             return Invite(result, self.__token)
@@ -145,7 +146,7 @@ class Channel:
         """Fetch pinned messages."""
         from .Message import Message
 
-        atom, result = await Request().send_async_request(f"/channels/{self.id}/pins", "GET", self.__token)
+        atom, result = await self.request_handler.send_async_request(f"/channels/{self.id}/pins", "GET", self.__token)
 
         if atom == 0:
             return [Message(i, self.__token) for i in result]
@@ -156,7 +157,7 @@ class Channel:
         """Pin a message with id."""
         raise_error(message_id, "message_id", str)
 
-        atom, result = await Request().send_async_request(f"/channels/{self.id}/pins/{message_id}", "PUT", self.__token)
+        atom, result = await self.request_handler.send_async_request(f"/channels/{self.id}/pins/{message_id}", "PUT", self.__token)
 
         if atom == 0:
             return True
@@ -167,8 +168,8 @@ class Channel:
         """Unpin a message with id."""
         raise_error(message_id, "message_id", str)
 
-        atom, result = await Request().send_async_request(f"/channels/{self.id}/pins/{message_id}", "DELETE",
-                                                          self.__token, {})
+        atom, result = await self.request_handler.send_async_request(f"/channels/{self.id}/pins/{message_id}", "DELETE",
+                                                                     self.__token, {})
 
         if atom == 0:
             return True
@@ -180,8 +181,8 @@ class Channel:
         raise_error(user_or_role_id, "user_or_role_id", str)
         raise_error(params, "params", dict)
 
-        atom, result = await Request().send_async_request(f"/channels/{self.id}/permissions/{user_or_role_id}", "PUT",
-                                                          self.__token, params)
+        atom, result = await self.request_handler.send_async_request(f"/channels/{self.id}/permissions/{user_or_role_id}", "PUT",
+                                                                     self.__token, params)
 
         if atom == 0:
             return self
@@ -192,8 +193,8 @@ class Channel:
         """Delete permissions from role/user"""
         raise_error(user_or_role_id, "user_or_role_id", str)
 
-        atom, result = await Request().send_async_request(f"/channels/{self.id}/permissions/{user_or_role_id}",
-                                                          "DELETE", self.__token, {})
+        atom, result = await self.request_handler.send_async_request(f"/channels/{self.id}/permissions/{user_or_role_id}",
+                                                                     "DELETE", self.__token, {})
 
         if atom == 0:
             return self
@@ -203,9 +204,34 @@ class Channel:
     async def trigger_typing(self):
         """Start typing in this channel."""
 
-        atom, result = await Request().send_async_request(f"/channels/{self.id}/typing", "POST", self.__token)
+        atom, result = await self.request_handler.send_async_request(f"/channels/{self.id}/typing", "POST", self.__token)
 
         if atom == 0:
             return self
         else:
             raise TriggerTypingFailed(result)
+
+    async def create_webhook(self, params: dict):
+        """Create a webhook with API params."""
+        raise_error(params, "params", dict)
+
+        from .Webhook import Webhook
+
+        atom, result = await self.request_handler.send_async_request(f"/channels/{self.id}/webhooks", "POST", self.__token, params)
+
+        if atom == 0:
+            return Webhook(result, self.__token)
+        else:
+            raise CreateWebhookFailed(result)
+
+    async def fetch_webhooks(self):
+        """Fetch all webhooks in the channel."""
+
+        from .Webhook import Webhook
+
+        atom, result = await self.request_handler.send_async_request(f"/channels/{self.id}/webhooks", "GET", self.__token)
+
+        if atom == 0:
+            return [Webhook(i, self.__token) for i in result]
+        else:
+            raise FetchWebhooksFailed(result)

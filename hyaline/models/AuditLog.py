@@ -9,10 +9,11 @@ class AuditLog:
 
         from .Webhook import Webhook
         from .User import User
-        
+
         for key in json:
             if key == "webhooks":
-                setattr(self, key, [Webhook(i, self.__token) for i in json[key]])
+                setattr(self, key, [Webhook(i, self.__token)
+                        for i in json[key]])
             elif key == "users":
                 setattr(self, key, [User(i, self.__token) for i in json[key]])
             else:

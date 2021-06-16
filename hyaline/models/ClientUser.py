@@ -14,6 +14,7 @@ class ClientUser:
     def __init__(self, json: dict, token: str, max_messages: int) -> None:
         self.__token: str = token
         self.max_messages = max_messages
+        self.request_handler = Request()
 
         for key in json:
             setattr(self, key, json[key])
@@ -143,7 +144,7 @@ class ClientUser:
 
         from .Channel import Channel
 
-        atom, result = await Request().send_async_request(f"/channels/{channel_id}", "GET", self.__token)
+        atom, result = await self.request_handler.send_async_request(f"/channels/{channel_id}", "GET", self.__token)
 
         if atom == 0:
             return Channel(result, self.__token)
@@ -170,16 +171,16 @@ class ClientUser:
 
         # if len(filtered) < 2:
         query_format = f"/channels/{channel_id}/messages?limit={limit}"
-        atom, result = await Request().send_async_request(query_format, "GET", self.__token)
+        atom, result = await self.request_handler.send_async_request(query_format, "GET", self.__token)
 
         if atom == 0:
             filtered = [
-                           Message(i, self.__token).id for i in result][::-1][:limit]
+                Message(i, self.__token).id for i in result][::-1][:limit]
         else:
             raise FetchChannelHistoryFailed(result)
 
-        atom, result = await Request().send_async_request(f"/channels/{channel_id}/messages/bulk-delete", "POST",
-                                                          self.__token, {"messages": filtered})
+        atom, result = await self.request_handler.send_async_request(f"/channels/{channel_id}/messages/bulk-delete", "POST",
+                                                                     self.__token, {"messages": filtered})
 
         if atom == 0:
             return filtered
@@ -197,8 +198,8 @@ class ClientUser:
 
         from .Message import Message
 
-        atom, result = await Request().send_async_request(f"/channels/{channel_id}/messages", "POST", self.__token,
-                                                          params)
+        atom, result = await self.request_handler.send_async_request(f"/channels/{channel_id}/messages", "POST", self.__token,
+                                                                     params)
 
         if atom == 0:
             return Message(result, self.__token)
@@ -216,8 +217,8 @@ class ClientUser:
 
         from .Invite import Invite
 
-        atom, result = await Request().send_async_request(f"/invites/{code}{d2q_converter(options)}", "GET",
-                                                          self.__token)
+        atom, result = await self.request_handler.send_async_request(f"/invites/{code}{d2q_converter(options)}", "GET",
+                                                                     self.__token)
 
         if atom == 0:
             return Invite(result, self.__token)
@@ -230,7 +231,7 @@ class ClientUser:
 
         from .Invite import Invite
 
-        atom, result = await Request().send_async_request(f"/invites/{code}", "DELETE", self.__token)
+        atom, result = await self.request_handler.send_async_request(f"/invites/{code}", "DELETE", self.__token)
 
         if atom == 0:
             return Invite(result, self.__token)
@@ -241,7 +242,7 @@ class ClientUser:
         """Fetch information about client user."""
         from .User import User
 
-        atom, result = await Request().send_async_request("/users/@me", "GET", self.__token)
+        atom, result = await self.request_handler.send_async_request("/users/@me", "GET", self.__token)
 
         if atom == 0:
             return User(result, self.__token)
@@ -254,7 +255,7 @@ class ClientUser:
 
         from .User import User
 
-        atom, result = await Request().send_async_request(f"/users/{user_id}", "GET", self.__token)
+        atom, result = await self.request_handler.send_async_request(f"/users/{user_id}", "GET", self.__token)
 
         if atom == 0:
             return User(result, self.__token)
@@ -286,8 +287,8 @@ class ClientUser:
 
         from .Guild import Guild
 
-        atom, result = await Request().send_async_request(f"/guilds/{guild_id}{d2q_converter(options)}", "GET",
-                                                          self.__token)
+        atom, result = await self.request_handler.send_async_request(f"/guilds/{guild_id}{d2q_converter(options)}", "GET",
+                                                                     self.__token)
 
         if atom == 0:
             return Guild(result, self.__token)
@@ -302,7 +303,7 @@ class ClientUser:
 
         from .User import User
 
-        atom, result = await Request().send_async_request("/users/@me", "PATCH", self.__token, params)
+        atom, result = await self.request_handler.send_async_request("/users/@me", "PATCH", self.__token, params)
 
         if atom == 0:
             return User(result, self.__token)
@@ -313,7 +314,7 @@ class ClientUser:
         """Leave a guild with id."""
         raise_error(guild_id, "guild_id", str)
 
-        atom, result = await Request().send_async_request(f"/users/@me/guilds/{guild_id}", "DELETE", self.__token, {})
+        atom, result = await self.request_handler.send_async_request(f"/users/@me/guilds/{guild_id}", "DELETE", self.__token, {})
 
         if atom == 0:
             return True
@@ -326,7 +327,7 @@ class ClientUser:
 
         from .GuildPreview import GuildPreview
 
-        atom, result = await Request().send_async_request(f"/guilds/{guild_id}/preview", "GET", self.__token)
+        atom, result = await self.request_handler.send_async_request(f"/guilds/{guild_id}/preview", "GET", self.__token)
 
         if atom == 0:
             return GuildPreview(result, self.__token)
@@ -339,7 +340,7 @@ class ClientUser:
 
         from .Guild import Guild
 
-        atom, result = await Request().send_async_request(f"/guilds", "POST", self.__token, params)
+        atom, result = await self.request_handler.send_async_request(f"/guilds", "POST", self.__token, params)
 
         if atom == 0:
             return Guild(result, self.__token)
@@ -351,7 +352,7 @@ class ClientUser:
 
         from .Channel import Channel
 
-        atom, result = await Request().send_async_request(f"/users/@me/channels", "POST", self.__token, {
+        atom, result = await self.request_handler.send_async_request(f"/users/@me/channels", "POST", self.__token, {
             "recipient_id": user_id
         })
 
@@ -359,3 +360,15 @@ class ClientUser:
             return Channel(result, self.__token)
         else:
             raise CreateDMFailed(result)
+
+    async def fetch_webhook(self, webhook_id: str):
+        """Fetch a webhook with ID."""
+
+        from .Webhook import Webhook
+
+        atom, result = await self.request_handler.send_async_request(f"/webhooks/{webhook_id}", "GET", self.__token)
+
+        if atom == 0:
+            return Webhook(result, self.__token)
+        else:
+            raise CreateWebhookFailed(result)

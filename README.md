@@ -1,14 +1,20 @@
 # Hyaline Discord API Wrapper.
-WARNING: Hyaline is not easy to use library. Created for someone who wants to use pure discord API. Also that means almost everything in under your control.
 
-Hyaline is a discord api wrapper for python. hyaline is created for discord developers and hyaline makes everything harder. *Its alpha-release and still not finished.*
+**WARNING**: Hyaline is not easy to use library.
+
+Hyaline is a discord api wrapper for python. hyaline is created for discord developers and hyaline makes everything harder. _Its in alpha-release and still not finished._
 
 Check `./docs` folder for documentation and more informations about hyaline. Documentation is not finished. You can use python `dir()` function for get all functions, attrs in the object. Also use `help()` for get help about a function / class.
 
-# Errors
-If you downloaded hyaline from pypi and not works, download the hyaline source code (github) and swap downloaded hyaline folder with `C:\Users\username\AppData\Local\Programs\Python\Python39\Lib\site-packages\hyaline` (location may can be different, find you python folder.). Now it probably will work now.
 
-Example Ping-Pong Discord Bot:
+## Current Version:
+0.0.5
+## Errors
+
+I don't recommend to download hyaline from pypi but if you downloaded hyaline from pypi and not works, download the hyaline source code (github) and swap downloaded hyaline folder with `C:\Users\username\AppData\Local\Programs\Python\Python39\Lib\site-packages\hyaline` (location may can be different, find you python folder.). Now it probably will work now.
+
+## Example Ping-Pong Discord Bot
+
 ```py
 # Import the library and intent helper.
 import hyaline

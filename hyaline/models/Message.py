@@ -16,6 +16,7 @@ class Message:
     def __init__(self, json, token) -> None:
         self.id = None
         self.channel_id = None
+
         from .Reaction import Reaction
         from .MessageActivity import MessageActivity
         from .Application import Application
@@ -28,6 +29,7 @@ class Message:
         from .Attachment import Attachment
 
         self.__token: str = token
+        self.request_handler = Request()
 
         for key in json:
             if key in ("mentions", "author"):
@@ -79,13 +81,13 @@ class Message:
             options = {}
         raise_error(options, "options", dict)
 
-        atom, result = await Request().send_async_request(f"/channels/{self.channel_id}/messages", "POST", self.__token,
-                                                          {
-                                                              **options,
-                                                              "message_reference": {
-                                                                  "message_id": self.id
-                                                              }
-                                                          })
+        atom, result = await self.request_handler.send_async_request(f"/channels/{self.channel_id}/messages", "POST", self.__token,
+                                                                     {
+                                                                         **options,
+                                                                         "message_reference": {
+                                                                             "message_id": self.id
+                                                                         }
+                                                                     })
 
         if atom == 0:
             return Message(result, self.__token)
@@ -98,8 +100,8 @@ class Message:
             options = {}
         raise_error(options, "options", dict)
 
-        atom, result = await Request().send_async_request(f"/channels/{self.channel_id}/messages/{self.id}", "PATCH",
-                                                          self.__token, options)
+        atom, result = await self.request_handler.send_async_request(f"/channels/{self.channel_id}/messages/{self.id}", "PATCH",
+                                                                     self.__token, options)
 
         if atom == 0:
             return Message(result, self.__token)
@@ -109,8 +111,8 @@ class Message:
     async def delete(self):
         """Delete the message."""
 
-        atom, result = await Request().send_async_request(f"/channels/{self.channel_id}/messages/{self.id}", "DELETE",
-                                                          self.__token)
+        atom, result = await self.request_handler.send_async_request(f"/channels/{self.channel_id}/messages/{self.id}", "DELETE",
+                                                                     self.__token)
 
         if atom == 0:
             return self
@@ -121,7 +123,7 @@ class Message:
         """Add reaction to message."""
         raise_error(emoji, "emoji", str)
 
-        atom, result = await Request().send_async_request(
+        atom, result = await self.request_handler.send_async_request(
             f"/channels/{self.channel_id}/messages/{self.id}/reactions/{quote(emoji)}/@me", "PUT", self.__token)
 
         if atom == 0:
@@ -136,7 +138,7 @@ class Message:
         if user is not None:
             raise_error(user, "user", str)
 
-        atom, result = await Request().send_async_request(
+        atom, result = await self.request_handler.send_async_request(
             f"/channels/{self.channel_id}/messages/{self.id}/reactions/{quote(emoji)}/{'@me' if user is None else user}",
             "DELETE", self.__token)
 
@@ -158,7 +160,7 @@ class Message:
 
         query_param = f"/channels/{self.channel_id}/messages/{self.id}/reactions/{emoji}{d2q_converter(options)}"
 
-        atom, result = await Request().send_async_request(query_param, "GET", self.__token)
+        atom, result = await self.request_handler.send_async_request(query_param, "GET", self.__token)
 
         if atom == 0:
             return [User(i, self.__token) for i in result]
@@ -170,7 +172,7 @@ class Message:
         if emoji is not None:
             raise_error(emoji, "emoji", str)
 
-        atom, result = await Request().send_async_request(
+        atom, result = await self.request_handler.send_async_request(
             f"/channels/{self.channel_id}/messages/{self.id}/reactions{'/' + quote(emoji) if emoji is not None else ''}",
             "DELETE", self.__token)
 
@@ -182,8 +184,8 @@ class Message:
     async def crosspost(self):
         """Cross post the message (https://discord.com/developers/docs/resources/channel#crosspost-message)"""
 
-        atom, result = await Request().send_async_request(f"/channels/{self.channel_id}/messages/{self.id}/crosspost",
-                                                          "POST", self.__token)
+        atom, result = await self.request_handler.send_async_request(f"/channels/{self.channel_id}/messages/{self.id}/crosspost",
+                                                                     "POST", self.__token)
 
         if atom == 0:
             return Message(result, self.__token)
