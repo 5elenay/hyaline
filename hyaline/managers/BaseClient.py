@@ -62,6 +62,7 @@ class Session:
         self.client = None
         self.session_id = None
         self.event_loop = asyncio.get_event_loop()
+        self.session = None
 
         self.events = []
         self.__will_loaded_events = []
@@ -156,7 +157,8 @@ class Session:
         ])
 
     async def __connect_to_gateway(self):
-        self.ws = await aiohttp.ClientSession().ws_connect(self.gateway)
+        self.session = aiohttp.ClientSession()
+        self.ws = await self.session.ws_connect(self.gateway)
 
     async def __get_session_id(self, packet):
         self.session_id = packet.get('session_id')
@@ -275,6 +277,8 @@ class Session:
         self.__load_events()
         await self.__connect_to_gateway()
         result = await self.__receive()
+
+        self.session = None
 
         # Reconnect
         if result == 0x1:

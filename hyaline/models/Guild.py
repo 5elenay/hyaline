@@ -351,7 +351,7 @@ class Guild:
         if atom == 0:
             return [Role(i) for i in result]
         else:
-            return FetchGuildRolesFailed(result)
+            raise FetchGuildRolesFailed(result)
 
     async def create_role(self, params=None):
         """Create new guild role with API params."""
@@ -368,7 +368,7 @@ class Guild:
         if atom == 0:
             return Role(result)
         else:
-            return CreateGuildRoleFailed(result)
+            raise CreateGuildRoleFailed(result)
 
     async def edit_role(self, role_id: str, params=None):
         """Edit a guild role with API params."""
@@ -387,7 +387,7 @@ class Guild:
         if atom == 0:
             return Role(result)
         else:
-            return EditGuildRoleFailed(result)
+            raise EditGuildRoleFailed(result)
 
     async def edit_role_position(self, *args):
         """Edit a guild role with API params."""
@@ -415,7 +415,7 @@ class Guild:
         if atom == 0:
             return self, role_id
         else:
-            return DeleteGuildRoleFailed(result)
+            raise DeleteGuildRoleFailed(result)
 
     async def change_nickname(self, params=None):
         """Change client-user guild nickname with API params."""
@@ -430,7 +430,7 @@ class Guild:
         if atom == 0:
             return result
         else:
-            return ChangeClientUserNicknameFailed(result)
+            raise ChangeClientUserNicknameFailed(result)
 
     async def fetch_url(self):
         """Fetch guild vanity url."""
@@ -442,7 +442,7 @@ class Guild:
         if atom == 0:
             return Invite(result, self.__token)
         else:
-            return FetchGuildVanityUrlFailed(result)
+            raise FetchGuildVanityUrlFailed(result)
 
     async def fetch_audit_log(self, params: dict = None):
         """Fetch audit log."""
@@ -459,4 +459,16 @@ class Guild:
         if atom == 0:
             return AuditLog(result, self.__token)
         else:
-            return FetchAuditLogFailed(result)
+            raise FetchAuditLogFailed(result)
+
+    async def fetch_guild_webhooks(self):
+        """Fetch guild webhooks."""
+
+        from .Webhook import Webhook
+
+        atom, result = await self.request_handler.send_async_request(f"/guilds/{self.id}/webhooks", "GET", self.__token)
+
+        if atom == 0:
+            return [Webhook(i, self.__token) for i in result]
+        else:
+            raise FetchAuditLogFailed(result)

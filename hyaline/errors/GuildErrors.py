@@ -158,3 +158,9 @@ class FetchAuditLogFailed(Exception):
     """Raises when fetching the guild audit log is failed."""
 
     pass
+
+
+class FetchGuildWebhooksFailed(Exception):
+    """Raises when fetching the guild webhooks is failed."""
+
+    pass
