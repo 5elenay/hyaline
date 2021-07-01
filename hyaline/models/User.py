@@ -8,6 +8,7 @@ class User:
         self.id = None
         self.discriminator = None
         self.username = None
+        self.bot = False
         self.__token: str = token
 
         for key in json:

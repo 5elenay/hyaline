@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from typing import Union
 from asyncio import sleep
+from ..meta import __github__, __version__
 
 from aiohttp import ClientSession, client_exceptions
 
@@ -28,7 +29,8 @@ class Request:
         async with ClientSession(trust_env=True) as session:
             async with session.request(method, url,
                                        headers={"Authorization": f"Bot {token}",
-                                                'Content-Type': 'application/json'},
+                                                "Content-Type": "application/json",
+                                                "User-Agent": f"{__github__} - v{__version__}"},
                                        json=body) as response:
                 try:
                     json_data = await response.json()

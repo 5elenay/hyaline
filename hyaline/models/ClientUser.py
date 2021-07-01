@@ -249,6 +249,19 @@ class ClientUser:
         else:
             raise FetchUserFailedError(result)
 
+    async def fetch_user_profile(self, user_id: str):
+        """Fetch user profile."""
+        raise_error(user_id, "user_id", str)
+
+        from .User import User
+
+        atom, result = await self.request_handler.send_async_request(f"/users/{user_id}/profile", "GET", self.__token)
+
+        if atom == 0:
+            return User(result, self.__token)
+        else:
+            raise FetchUserFailedError(result)
+
     async def fetch_user(self, user_id: str):
         """Fetch information about an user."""
         raise_error(user_id, "user_id", str)

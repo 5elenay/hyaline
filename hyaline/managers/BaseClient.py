@@ -15,6 +15,7 @@ from ..models.Message import Message
 from ..models.User import User
 from ..utils.Request import Request
 from ..utils.WrongType import raise_error
+from ..meta import __version__, __author__
 
 async_request = Request().send_async_request
 
@@ -35,37 +36,46 @@ class Session:
     HEARTBEAT_ACK = 11
     GUILD_SYNC = 12
 
-    def __init__(self, options: dict) -> None:
+    def __init__(self, options: dict, will_loaded_events: list = None) -> None:
         if not isinstance(options, dict):
             raise TypeError("Options argument must be a dictionary.")
 
-        if "TOKEN" not in options:
+        self.options = options
+
+        if "TOKEN" not in self.options:
             raise TokenNotFoundError("Please pass a token in session option.")
 
-        if "INTENTS" not in options:
+        if "INTENTS" not in self.options:
             raise IntentNotFoundError(
                 "Please pass a intent.")
 
-        raise_error(options['TOKEN'], "TOKEN", str)
-        raise_error(options['INTENTS'], "INTENTS", int)
+        raise_error(self.options['TOKEN'], "TOKEN", str)
+        raise_error(self.options['INTENTS'], "INTENTS", int)
 
-        if 'MAX_MESSAGES' in options:
-            raise_error(options['MAX_MESSAGES'], "MAX_MESSAGES", int)
+        self.shard_count = 0
+
+        if 'MAX_MESSAGES' in self.options:
+            raise_error(self.options['MAX_MESSAGES'], "MAX_MESSAGES", int)
             self.max_messages = options['MAX_MESSAGES']
         else:
             self.max_messages = 100
 
-        self.token = options['TOKEN']
-        self.intents = options['INTENTS']
+        self.token = self.options['TOKEN']
+        self.intents = self.options['INTENTS']
         self.gateway = "wss://gateway.discord.gg/?v=9&encoding=json"
         self.ws = None
         self.client = None
         self.session_id = None
         self.event_loop = asyncio.get_event_loop()
         self.session = None
+        self.shards = []
 
         self.events = []
-        self.__will_loaded_events = []
+
+        if will_loaded_events is None:
+            self.__will_loaded_events = []
+        else:
+            self.__will_loaded_events = will_loaded_events
 
     def event(self, event_name: str, fn: Callable) -> True:
         """Create new event."""
@@ -163,22 +173,27 @@ class Session:
     async def __get_session_id(self, packet):
         self.session_id = packet.get('session_id')
 
-    async def __identify(self, packet):
+    async def __identify(self, packet, shard_id: int = 0):
         heartbeat = packet['d']['heartbeat_interval']
 
         if self.session_id is None:
-            await self.ws.send_json({
+            payload = {
                 "op": self.IDENTIFY,
                 "d": {
                     "token": self.token,
                     "intents": self.intents,
                     "properties": {
                         "$os": "linux",
-                        "$browser": "5elenay/hyaline",
-                        "$device": "5elenay/hyaline"
+                        "$browser": f"@{__author__}/hyaline",
+                        "$device": f"@{__author__}/hyaline"
                     }
                 }
-            })
+            }
+
+            if self.shard_count > 0:
+                payload['d']['shard'] = [shard_id, self.shard_count]
+
+            await self.ws.send_json(payload)
         else:
             await self.ws.send_json({
                 "op": self.RESUME,
@@ -241,7 +256,7 @@ class Session:
 
             await asyncio.gather(*filtered)
 
-    async def __receive(self):
+    async def __receive(self, shard_id: int = None):
         while True:
             packet = await self.ws.receive()
 
@@ -259,7 +274,7 @@ class Session:
             # print(packet)
 
             if packet['op'] == self.HELLO:
-                await self.__identify(packet)
+                await self.__identify(packet, shard_id)
             elif packet['op'] == self.RECONNECT:
                 return 0x1
             elif packet['op'] == self.DISPATCH:
@@ -272,11 +287,15 @@ class Session:
                     traceback.print_exception(
                         type(error), error, error.__traceback__, file=sys.stderr)
 
-    async def __start_client(self):
+    async def __start_client(self, shard_id: int = None):
         await self.__check_token()
         self.__load_events()
         await self.__connect_to_gateway()
-        result = await self.__receive()
+
+        if shard_id is None:
+            result = await self.__receive()
+        else:
+            result = await self.__receive(shard_id)
 
         self.session = None
 
@@ -295,7 +314,22 @@ class Session:
             "d": params
         })
 
-    def start(self):
+    def start(self, shard_count: int = None):
         """Start the session."""
+        if shard_count is not None:
+            raise_error(shard_count, "shard_count", int)
+            self.shard_count = shard_count
 
-        self.event_loop.run_until_complete(self.__start_client())
+            tasks = []
+            for shard in range(self.shard_count):
+                shard_client = Session(self.options, self.__will_loaded_events)
+                self.shards.append(shard_client)
+
+                tasks.append(shard_client.__start_client(shard))
+
+            async def __host_shards(shards):
+                return await asyncio.gather(*shards)
+
+            self.event_loop.run_until_complete(__host_shards(tasks))
+        else:
+            self.event_loop.run_until_complete(self.__start_client())
