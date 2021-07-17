@@ -5,7 +5,7 @@
 ![Stars](https://img.shields.io/github/stars/5elenay/hyaline)
 ![Commits](https://img.shields.io/github/commit-activity/w/5elenay/hyaline)
 
-**WARNING**: This module is will no longer get a update. Check [krema](https://github.com/kremayard) project instead!
+**WARNING**: This module will no longer get an update now. Check [krema](https://github.com/kremayard) project instead!
 
 Hyaline is a discord api wrapper for python. hyaline is created for discord developers and hyaline makes everything harder. _Hyaline is in alpha-release and still not finished._
 
